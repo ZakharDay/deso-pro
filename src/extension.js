@@ -1,21 +1,21 @@
-import { getPublicKeys } from './javascript/openfund_wallet_html'
+import {
+  getHtmlHolderPublicKey,
+  markHtmlWalletMyTokens,
+  updateHtmlWalletMyTokenRow
+} from './javascript/openfund_wallet_html'
 
 import {
   getApiIsHodlingPublicKey,
   getApiMarketOrderData
 } from './javascript/openfund_api_requests'
 
-const holderKey = 'BC1YLgeXsafJ8vYcXurRMLy5UcYGbLtjnoXZZWZLuXJqbDVQqXAE6mf'
 const focusKey = 'BC1YLjEayZDjAPitJJX4Boy7LsEfN3sWAkYb3hgE9kGBirztsc2re1N'
-// const desoKey = 'BC1YLgk64us61PUyJ7iTEkV4y2GqpHSi8ejWJRnZwsX6XRTZSfUKsop'
 const desoProxyKey = 'BC1YLbnP7rndL92x7DbLp6bkUpCgKmgoHgz7xEbwhgHTps3ZrXA6LtQ'
 const usdcKey = 'BC1YLiwTN3DbkU8VmD7F7wXcRR1tFX6jDEkLyruHD2WsH3URomimxLX'
-
-// const openfundKey = 'BC1YLj3zNA7hRAqBVkvsTeqw7oi4H6ogKiAFL1VXhZy6pYeZcZ6TDRY'
+// const desoKey = 'BC1YLgk64us61PUyJ7iTEkV4y2GqpHSi8ejWJRnZwsX6XRTZSfUKsop'
 
 let pageObserver
-let publicKeys
-let currentElement
+let holderKey
 
 function observeUrlChange() {
   let lastUrl = location.href
@@ -62,47 +62,54 @@ function waitAsyncPageLoad() {
     if (document.head && document.body && currentPageDetector) {
       // console.log('DETECTOR LOADED')
 
-      currentElement = document.getElementById(myTokensPanelId)
-      publicKeys = getPublicKeys(currentElement)
+      const container = document.getElementById(myTokensPanelId)
+      holderKey = getHtmlHolderPublicKey()
 
-      // console.log(publicKeys.length)
+      markHtmlWalletMyTokens(container).then((tokenRows) => {
+        for (let index = 0; index < tokenRows.length; index++) {
+          const tokenRow = tokenRows[index]
+          const holdingKey = tokenRow.dataset.publicKey
 
-      publicKeys.forEach((holdingKey) => {
-        getApiIsHodlingPublicKey(holderKey, holdingKey).then((data) => {
-          // console.log(data.username)
+          getApiIsHodlingPublicKey(holderKey, holdingKey).then((token) => {
+            const transactorKey = holderKey
+            const baseKey = holdingKey
 
-          let transactorKey = holderKey
-          let baseKey = holdingKey
+            if (token.username != 'focus') {
+              getApiMarketOrderData(
+                focusKey,
+                baseKey,
+                transactorKey,
+                token.quantity,
+                token.username,
+                'FOCUS'
+              ).then((trade) => {
+                updateHtmlWalletMyTokenRow(tokenRow, token, 'FOCUS', trade)
+              })
+            }
 
-          if (data.username != 'focus') {
             getApiMarketOrderData(
-              focusKey,
+              usdcKey,
               baseKey,
               transactorKey,
-              data.quantity,
-              data.username,
-              'FOCUS'
-            )
-          }
+              token.quantity,
+              token.username,
+              'USDC'
+            ).then((trade) => {
+              updateHtmlWalletMyTokenRow(tokenRow, token, 'USDC', trade)
+            })
 
-          getApiMarketOrderData(
-            usdcKey,
-            baseKey,
-            transactorKey,
-            data.quantity,
-            data.username,
-            'USDC'
-          )
-
-          getApiMarketOrderData(
-            desoProxyKey,
-            baseKey,
-            transactorKey,
-            data.quantity,
-            data.username,
-            'DESO'
-          )
-        })
+            getApiMarketOrderData(
+              desoProxyKey,
+              baseKey,
+              transactorKey,
+              token.quantity,
+              token.username,
+              'DESO'
+            ).then((trade) => {
+              updateHtmlWalletMyTokenRow(tokenRow, token, 'DESO', trade)
+            })
+          })
+        }
       })
     } else {
       // console.log('WILL REPEAT')

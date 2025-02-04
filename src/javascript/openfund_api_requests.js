@@ -79,64 +79,39 @@ function getApiMarketOrderData(
   username,
   base
 ) {
-  // console.log('getApiMarketOrderData', username)
+  return new Promise((resolve) => {
+    // console.log('getApiMarketOrderData', username)
 
-  fetch(createDaoCoinLimitOrderWithFeeUrl, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      OperationType: 'ASK',
-      QuoteCurrencyPublicKeyBase58Check: quoteKey,
-      BaseCurrencyPublicKeyBase58Check: baseKey,
-      Quantity: `${quantity}`,
-      FillType: 'IMMEDIATE_OR_CANCEL',
-      QuantityCurrencyType: 'base',
-      Price: '0.000000000',
-      PriceCurrencyType: 'quote',
-      TransactorPublicKeyBase58Check: transactorKey,
-      MinFeeRateNanosPerKB: 0,
-      TransactionFees: null,
-      OptionalPrecedingTransactions: null
-    })
-  })
-    .then((response) => {
-      response.json().then((data) => {
-        // console.log(data)
-
-        const executionAmount = data['ExecutionAmount']
-
-        if (executionAmount && executionAmount != '0.0') {
-          // prettier-ignore
-          const executionPriceInQuoteCurrency = data['ExecutionPriceInQuoteCurrency']
-          const executionPriceInUsd = data['ExecutionPriceInUsd']
-          const totalInUsd = executionPriceInUsd * executionAmount
-
-          // if (username == 'DeSoInu') {
-          //   console.log('===')
-          //   console.log('DESOINU')
-          //   console.log('===')
-          // }
-          // prettier-ignore
-          console.log(
-          `${Number(executionAmount).toFixed(
-            2
-          )} ${username} to ${executionPriceInQuoteCurrency} ${base} ($${Number(
-            totalInUsd
-          ).toFixed(2)})`
-        )
-
-          // console.log('Success:', username, base, quantity, data)
-          // console.log('Success:', username, data)
-          // console.log('')
-          // console.log('')
-        }
+    fetch(createDaoCoinLimitOrderWithFeeUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        OperationType: 'ASK',
+        QuoteCurrencyPublicKeyBase58Check: quoteKey,
+        BaseCurrencyPublicKeyBase58Check: baseKey,
+        Quantity: `${quantity}`,
+        FillType: 'IMMEDIATE_OR_CANCEL',
+        QuantityCurrencyType: 'base',
+        Price: '0.000000000',
+        PriceCurrencyType: 'quote',
+        TransactorPublicKeyBase58Check: transactorKey,
+        MinFeeRateNanosPerKB: 0,
+        TransactionFees: null,
+        OptionalPrecedingTransactions: null
       })
     })
-    .catch((error) => {
-      console.error('Error:', username, error)
-    })
+      .then((response) => {
+        response.json().then((data) => {
+          // console.log(data)
+          resolve(data)
+        })
+      })
+      .catch((error) => {
+        console.error('Error:', username, error)
+      })
+  })
 }
 
 export { getApiIsHodlingPublicKey, getApiMarketOrderData }
