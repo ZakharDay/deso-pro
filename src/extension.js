@@ -7,9 +7,9 @@ import {
 
 const holderKey = 'BC1YLgeXsafJ8vYcXurRMLy5UcYGbLtjnoXZZWZLuXJqbDVQqXAE6mf'
 const focusKey = 'BC1YLjEayZDjAPitJJX4Boy7LsEfN3sWAkYb3hgE9kGBirztsc2re1N'
-const desoKey = 'BC1YLgk64us61PUyJ7iTEkV4y2GqpHSi8ejWJRnZwsX6XRTZSfUKsop'
+// const desoKey = 'BC1YLgk64us61PUyJ7iTEkV4y2GqpHSi8ejWJRnZwsX6XRTZSfUKsop'
+const desoProxyKey = 'BC1YLbnP7rndL92x7DbLp6bkUpCgKmgoHgz7xEbwhgHTps3ZrXA6LtQ'
 const usdcKey = 'BC1YLiwTN3DbkU8VmD7F7wXcRR1tFX6jDEkLyruHD2WsH3URomimxLX'
-const proxyKey = 'BC1YLbnP7rndL92x7DbLp6bkUpCgKmgoHgz7xEbwhgHTps3ZrXA6LtQ'
 
 // const openfundKey = 'BC1YLj3zNA7hRAqBVkvsTeqw7oi4H6ogKiAFL1VXhZy6pYeZcZ6TDRY'
 
@@ -60,44 +60,30 @@ function waitAsyncPageLoad() {
 
   if (firstLettersAccepted.includes(urlPartFirstLetter)) {
     if (document.head && document.body && currentPageDetector) {
-      console.log('DETECTOR LOADED')
+      // console.log('DETECTOR LOADED')
 
       currentElement = document.getElementById(myTokensPanelId)
       publicKeys = getPublicKeys(currentElement)
 
+      // console.log(publicKeys.length)
+
       publicKeys.forEach((holdingKey) => {
         getApiIsHodlingPublicKey(holderKey, holdingKey).then((data) => {
-          // console.log(data)
+          // console.log(data.username)
 
           let transactorKey = holderKey
           let baseKey = holdingKey
-          // let quoteKey = holdingKey
 
-          // if (quoteKey == focusKey || quoteKey == openfundKey) {
-          //   baseKey = desoKey
-          // } else {
-          //   baseKey = focusKey
-          // }
-
-          // getApiMarketOrderData(
-          //   quoteKey,
-          //   desoKey,
-          //   transactorKey,
-          //   data.quantity,
-          //   data.username,
-          //   'DESO'
-          // )
-
-          // quoteKey, baseKey, transactorKey, quantity, username, base
-
-          getApiMarketOrderData(
-            focusKey,
-            baseKey,
-            transactorKey,
-            data.quantity,
-            data.username,
-            'FOCUS'
-          )
+          if (data.username != 'focus') {
+            getApiMarketOrderData(
+              focusKey,
+              baseKey,
+              transactorKey,
+              data.quantity,
+              data.username,
+              'FOCUS'
+            )
+          }
 
           getApiMarketOrderData(
             usdcKey,
@@ -109,76 +95,23 @@ function waitAsyncPageLoad() {
           )
 
           getApiMarketOrderData(
-            proxyKey,
+            desoProxyKey,
             baseKey,
             transactorKey,
             data.quantity,
             data.username,
-            // 'PROXY'
             'DESO'
           )
         })
       })
     } else {
-      console.log('WILL REPEAT')
+      // console.log('WILL REPEAT')
 
       setTimeout(() => {
         waitAsyncPageLoad()
       }, 100)
     }
   }
-
-  // console.log(host, pathname, urlPart, urlPartFirstLetter, urlPartSecondLetter)
-
-  // const mainDetector = document.querySelector('.global__center__inner')
-  // const profileDetector = document.querySelector('.creator-profile__top-bar')
-
-  // document.addEventListener('click', () => {
-  //   initModalCatcher()
-  // })
-
-  // if (firstLettersAccepted.includes(urlPartFirstLetter)) {
-  //   if (document.head && document.body && mainDetector) {
-  //     injectHtmlCss()
-  //     markHtmlBody(urlPartFirstLetter)
-
-  //     if (urlPartFirstLetter === 'w' && mainDetector) {
-  //       initWalletPage()
-  //       initSidebar()
-  //     } else if (urlPartFirstLetter === 'u' && profileDetector) {
-  //       const urlLastPart = urlPart.substr(urlPart.lastIndexOf('/') + 1)
-
-  //       if (urlLastPart != 'buy' && urlLastPart != 'sell') {
-  //         initProfilePage()
-  //       }
-  //     } else if (
-  //       urlPartFirstLetter === 'b' &&
-  //       urlPartSecondLetter === 'r' &&
-  //       mainDetector
-  //     ) {
-  //       initBrowsePage()
-  //     } else if (
-  //       urlPartFirstLetter === 'n' ||
-  //       urlPartFirstLetter === 's' ||
-  //       urlPartFirstLetter === 'b'
-  //     ) {
-  //       getApiBitCloutPrice().then((bitCloutPrice) => {
-  //         setStoreBitCloutPrice(bitCloutPrice)
-  //         addHtmlBitCloutPrice()
-  //       })
-  //     } else {
-  //       markHtmlBody('')
-
-  //       setTimeout(() => {
-  //         waitAsyncPageLoad()
-  //       }, 100)
-  //     }
-  //   } else {
-  //     setTimeout(() => {
-  //       waitAsyncPageLoad()
-  //     }, 100)
-  //   }
-  // }
 }
 
 observeUrlChange()

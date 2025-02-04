@@ -56,9 +56,11 @@ function getApiIsHodlingPublicKey(holderKey, holdingKey) {
           const quantity =
             Number(data['BalanceEntry']['BalanceNanosUint256']) /
               1000000000000000000 -
-            0.0000000000001
+            0.0001
+          // 0.00000000001
+          // 0.0000000000001
 
-          // console.log(username, quantity)
+          // console.log(username, quantity, data)
 
           resolve({ username, quantity })
         })
@@ -77,7 +79,7 @@ function getApiMarketOrderData(
   username,
   base
 ) {
-  // console.log(username, quantity, `${quantity}`)
+  // console.log('getApiMarketOrderData', username)
 
   fetch(createDaoCoinLimitOrderWithFeeUrl, {
     method: 'POST',
@@ -98,20 +100,26 @@ function getApiMarketOrderData(
       TransactionFees: null,
       OptionalPrecedingTransactions: null
     })
-  }).then((response) => {
-    response.json().then((data) => {
-      // console.log(data)
+  })
+    .then((response) => {
+      response.json().then((data) => {
+        // console.log(data)
 
-      const executionAmount = data['ExecutionAmount']
+        const executionAmount = data['ExecutionAmount']
 
-      if (executionAmount && executionAmount != '0.0') {
-        // prettier-ignore
-        const executionPriceInQuoteCurrency = data['ExecutionPriceInQuoteCurrency']
-        const executionPriceInUsd = data['ExecutionPriceInUsd']
-        const totalInUsd = executionPriceInUsd * executionAmount
+        if (executionAmount && executionAmount != '0.0') {
+          // prettier-ignore
+          const executionPriceInQuoteCurrency = data['ExecutionPriceInQuoteCurrency']
+          const executionPriceInUsd = data['ExecutionPriceInUsd']
+          const totalInUsd = executionPriceInUsd * executionAmount
 
-        // prettier-ignore
-        console.log(
+          // if (username == 'DeSoInu') {
+          //   console.log('===')
+          //   console.log('DESOINU')
+          //   console.log('===')
+          // }
+          // prettier-ignore
+          console.log(
           `${Number(executionAmount).toFixed(
             2
           )} ${username} to ${executionPriceInQuoteCurrency} ${base} ($${Number(
@@ -119,15 +127,16 @@ function getApiMarketOrderData(
           ).toFixed(2)})`
         )
 
-        // console.log('Success:', username, base, quantity, data)
-        // console.log('')
-        // console.log('')
-      }
+          // console.log('Success:', username, base, quantity, data)
+          // console.log('Success:', username, data)
+          // console.log('')
+          // console.log('')
+        }
+      })
     })
-  })
-  // .catch((error) => {
-  //   console.error('Error:', error)
-  // })
+    .catch((error) => {
+      console.error('Error:', username, error)
+    })
 }
 
 export { getApiIsHodlingPublicKey, getApiMarketOrderData }
