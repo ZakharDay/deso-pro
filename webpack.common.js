@@ -18,8 +18,19 @@ module.exports = {
   module: {
     rules: [
       {
+        test: /\.(js|jsx)$/i,
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['@babel/preset-env', '@babel/preset-react'],
+            plugins: ['@babel/plugin-proposal-class-properties']
+          }
+        }
+      },
+      {
         test: /\.scss$/i,
-        use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader']
+        use: ['css-loader', 'sass-loader']
       },
       {
         test: /\.html$/i,
@@ -35,22 +46,9 @@ module.exports = {
     new CopyPlugin({
       patterns: [
         { from: 'src/images', to: 'images' },
+        { from: 'src/popup.html', to: 'popup.html' },
         { from: 'manifest.json', to: 'manifest.json' }
       ]
-    }),
-    new MiniCssExtractPlugin({
-      filename: '[name].css',
-      chunkFilename: '[id].css'
-    }),
-    new HtmlWebpackPlugin({
-      hash: true,
-      scriptLoading: 'blocking',
-      template: './src/popup.html',
-      filename: './popup.html',
-      chunks: ['popup']
     })
-  ],
-  optimization: {
-    minimizer: [new CssMinimizerPlugin()]
-  }
+  ]
 }

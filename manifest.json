@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "DeSo Pro",
-  "description": "",
+  "description": "Use Openfund, Focus and DeSo like a pro",
   "version": "0.1.0",
   "content_scripts": [
     {
@@ -10,7 +10,6 @@
       "run_at": "document_end"
     }
   ],
-  "permissions": ["storage"],
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
