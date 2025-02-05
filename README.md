@@ -1,4 +1,4 @@
-# Deso Pro Chrome Extension
+# DeSo Pro Chrome Extension
 
 Know real time prices to maximize trading profits
 
