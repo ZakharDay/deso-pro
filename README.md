@@ -15,3 +15,17 @@ Features on the Openfund Wallet page:
 - Adds token trading fee percentage
 
 New features coming soon
+
+## Build and load by yourself
+
+You will need node and yarn, install packages and build the project with the command below. After completion load unpacked extension in your browser from the dist folder.
+
+```shell
+yarn && yarn build
+```
+
+## If you want to support the development
+
+Use it, spread knowledge, like, comment or tip/donate if you wish.
+
+Im on [Focus](https://focus.xyz/zakharday), [BitClout](https://bitclout.com/u/zakharday), [Diamond](https://diamondapp.com/u/zakharday), [DeSo](https://explorer.deso.com/u/zakharday) and [X](https://x.com/ZakharDay).
