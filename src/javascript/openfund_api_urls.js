@@ -4,4 +4,6 @@ const isHodlingPublicKeyUrl =
 const createDaoCoinLimitOrderWithFeeUrl =
   'https://blockproducer.deso.org/api/v0/create-dao-coin-limit-order-with-fee'
 
-export { isHodlingPublicKeyUrl, createDaoCoinLimitOrderWithFeeUrl }
+const focusGqlUrl = 'https://dev-graphql.focus.xyz/graphql'
+
+export { isHodlingPublicKeyUrl, createDaoCoinLimitOrderWithFeeUrl, focusGqlUrl }

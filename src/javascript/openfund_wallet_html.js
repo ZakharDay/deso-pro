@@ -64,6 +64,12 @@ function markHtmlWalletMyTokens(container) {
       const valueCell = tokenRow.querySelector('td:nth-child(6)')
       valueCell.id = 'valueCell'
 
+      const totalValueInUsdCell = valueCell.querySelector(
+        'div.ml-auto > div:first-child'
+      )
+
+      totalValueInUsdCell.id = 'totalValueInUsdCell'
+
       const totalValueInUsd = valueCell.querySelector(
         'div.ml-auto > div:first-child > *:first-child'
       )
@@ -158,8 +164,21 @@ function updateHtmlWalletMyTokenRow(tokenRow, token, quote, trade) {
   }
 }
 
+function updateHtmlWalletMyTokenRowPnl(tokenRow, totalInUsd) {
+  const totalValueInUsdCell = tokenRow.querySelector('#totalValueInUsdCell')
+  const totalValueInUsd = tokenRow.querySelector('#totalValueInUsd')
+  const totalInUsdFormated = formatPrice(totalInUsd, 2)
+  totalValueInUsd.innerText = `${totalValueInUsd.innerText} (${totalInUsdFormated})`
+
+  if (totalInUsd < 0) {
+    totalValueInUsdCell.classList.remove('text-green-600', 'font-shadow-green')
+    totalValueInUsdCell.classList.add('text-red-600')
+  }
+}
+
 export {
   getHtmlHolderPublicKey,
   markHtmlWalletMyTokens,
-  updateHtmlWalletMyTokenRow
+  updateHtmlWalletMyTokenRow,
+  updateHtmlWalletMyTokenRowPnl
 }

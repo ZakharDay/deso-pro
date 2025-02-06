@@ -1,10 +1,11 @@
 import {
   isHodlingPublicKeyUrl,
-  createDaoCoinLimitOrderWithFeeUrl
+  createDaoCoinLimitOrderWithFeeUrl,
+  focusGqlUrl
 } from './openfund_api_urls'
 
 function getApiIsHodlingPublicKey(holderKey, holdingKey) {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     fetch(isHodlingPublicKeyUrl, {
       method: 'POST',
       headers: {
@@ -67,6 +68,7 @@ function getApiIsHodlingPublicKey(holderKey, holdingKey) {
       })
       .catch((error) => {
         console.error('Error:', error)
+        reject()
       })
   })
 }
@@ -79,7 +81,7 @@ function getApiMarketOrderData(
   username,
   base
 ) {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     // console.log('getApiMarketOrderData', username)
 
     fetch(createDaoCoinLimitOrderWithFeeUrl, {
@@ -110,8 +112,52 @@ function getApiMarketOrderData(
       })
       .catch((error) => {
         console.error('Error:', username, error)
+        reject()
       })
   })
 }
 
-export { getApiIsHodlingPublicKey, getApiMarketOrderData }
+function getApiGqlTradingRecentTrades(tokenPublicKey, traderPublicKey) {
+  return new Promise((resolve, reject) => {
+    fetch(focusGqlUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        operationName: 'TradingRecentTrades',
+        variables: {
+          orderBy: 'TRADE_TIMESTAMP_DESC',
+          filter: {
+            tokenPublicKey: {
+              equalTo: tokenPublicKey
+            },
+            traderPublicKey: {
+              equalTo: traderPublicKey
+            }
+          },
+          first: 20,
+          offset: 0
+        },
+        query:
+          'query TradingRecentTrades($first: Int, $orderBy: [TradingRecentTradesOrderBy!], $filter: TradingRecentTradeFilter, $offset: Int) {\n  tradingRecentTrades(\n    first: $first\n    orderBy: $orderBy\n    filter: $filter\n    offset: $offset\n  ) {\n    nodes {\n      denominatedCoinPublicKey\n      tradeTimestamp\n      tradeType\n      traderPublicKey\n      traderUsername\n      traderDisplayName\n      traderProfilePicUrl\n      tokenPublicKey\n      tokenUsername\n      tokenProfilePicUrl\n      tokenCategory\n      tradeValueUsd\n      tradeValueFocus\n      tradeValueDeso\n      tradePriceUsd\n      tradePriceFocus\n      tradePriceDeso\n      tokenMarketCapUsd\n      tokenMarketCapFocus\n      txnHashHex\n      tradeBuyCoinPublicKey\n      tradeSellCoinPublicKey\n      tradeBuyQuantity\n      tradeSellQuantity\n      __typename\n    }\n    pageInfo {\n      hasNextPage\n      hasPreviousPage\n      startCursor\n      endCursor\n      __typename\n    }\n    totalCount\n    __typename\n  }\n}'
+      })
+    })
+      .then((response) => {
+        response.json().then((data) => {
+          // console.log('Success:', data)
+          resolve(data)
+        })
+      })
+      .catch((error) => {
+        console.error('Error:', error)
+        reject()
+      })
+  })
+}
+
+export {
+  getApiIsHodlingPublicKey,
+  getApiMarketOrderData,
+  getApiGqlTradingRecentTrades
+}

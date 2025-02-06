@@ -1,13 +1,17 @@
 import {
   getHtmlHolderPublicKey,
   markHtmlWalletMyTokens,
-  updateHtmlWalletMyTokenRow
+  updateHtmlWalletMyTokenRow,
+  updateHtmlWalletMyTokenRowPnl
 } from './javascript/openfund_wallet_html'
 
 import {
   getApiIsHodlingPublicKey,
-  getApiMarketOrderData
+  getApiMarketOrderData,
+  getApiGqlTradingRecentTrades
 } from './javascript/openfund_api_requests'
+
+import { processDataRecentTrades } from './javascript/data_modifiers'
 
 const focusKey = 'BC1YLjEayZDjAPitJJX4Boy7LsEfN3sWAkYb3hgE9kGBirztsc2re1N'
 const desoProxyKey = 'BC1YLbnP7rndL92x7DbLp6bkUpCgKmgoHgz7xEbwhgHTps3ZrXA6LtQ'
@@ -73,40 +77,62 @@ function waitAsyncPageLoad() {
           getApiIsHodlingPublicKey(holderKey, holdingKey).then((token) => {
             const transactorKey = holderKey
             const baseKey = holdingKey
+            const promises = []
 
             if (token.username != 'focus') {
+              promises.push(
+                getApiMarketOrderData(
+                  focusKey,
+                  baseKey,
+                  transactorKey,
+                  token.quantity,
+                  token.username,
+                  'FOCUS'
+                ).then((trade) => {
+                  promises.push(
+                    updateHtmlWalletMyTokenRow(tokenRow, token, 'FOCUS', trade)
+                  )
+                })
+              )
+            }
+
+            promises.push(
               getApiMarketOrderData(
-                focusKey,
+                usdcKey,
                 baseKey,
                 transactorKey,
                 token.quantity,
                 token.username,
-                'FOCUS'
+                'USDC'
               ).then((trade) => {
-                updateHtmlWalletMyTokenRow(tokenRow, token, 'FOCUS', trade)
+                promises.push(
+                  updateHtmlWalletMyTokenRow(tokenRow, token, 'USDC', trade)
+                )
               })
-            }
+            )
 
-            getApiMarketOrderData(
-              usdcKey,
-              baseKey,
-              transactorKey,
-              token.quantity,
-              token.username,
-              'USDC'
-            ).then((trade) => {
-              updateHtmlWalletMyTokenRow(tokenRow, token, 'USDC', trade)
-            })
+            promises.push(
+              getApiMarketOrderData(
+                desoProxyKey,
+                baseKey,
+                transactorKey,
+                token.quantity,
+                token.username,
+                'DESO'
+              ).then((trade) => {
+                promises.push(
+                  updateHtmlWalletMyTokenRow(tokenRow, token, 'DESO', trade)
+                )
+              })
+            )
 
-            getApiMarketOrderData(
-              desoProxyKey,
-              baseKey,
-              transactorKey,
-              token.quantity,
-              token.username,
-              'DESO'
-            ).then((trade) => {
-              updateHtmlWalletMyTokenRow(tokenRow, token, 'DESO', trade)
+            Promise.all(promises).then(() => {
+              getApiGqlTradingRecentTrades(holdingKey, holderKey).then(
+                (trades) => {
+                  const totalInUsd = processDataRecentTrades(trades)
+                  updateHtmlWalletMyTokenRowPnl(tokenRow, totalInUsd)
+                }
+              )
             })
           })
         }
