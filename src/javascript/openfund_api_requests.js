@@ -106,7 +106,7 @@ function getApiMarketOrderData(
     })
       .then((response) => {
         response.json().then((data) => {
-          // console.log(data)
+          console.log(data)
           resolve(data)
         })
       })
@@ -145,7 +145,7 @@ function getApiGqlTradingRecentTrades(tokenPublicKey, traderPublicKey) {
     })
       .then((response) => {
         response.json().then((data) => {
-          // console.log('Success:', data)
+          console.log('Success:', data)
           resolve(data)
         })
       })

@@ -148,6 +148,7 @@ function updateHtmlWalletMyTokenRow(tokenRow, token, quote, trade) {
 
     tokenPriceInUsd.innerText = formatPrice(newTokenPrice, 6)
     tokenPriceInQuoteCurrencyQuote.innerText = quote
+    tokenPriceInQuoteCurrencyQuote.dataset.quote = quote
 
     tokenPriceInQuoteCurrencyAmount.innerText = formatPrice(
       trade['ExecutionPriceInQuoteCurrency'],
@@ -164,15 +165,95 @@ function updateHtmlWalletMyTokenRow(tokenRow, token, quote, trade) {
   }
 }
 
-function updateHtmlWalletMyTokenRowPnl(tokenRow, totalInUsd) {
+function updateHtmlWalletMyTokenRowPnl(tokenRow, total) {
   const totalValueInUsdCell = tokenRow.querySelector('#totalValueInUsdCell')
   const totalValueInUsd = tokenRow.querySelector('#totalValueInUsd')
-  const totalInUsdFormated = formatPrice(totalInUsd, 2)
+  const totalInUsdFormated = formatPrice(total.totalInUsd, 2)
   totalValueInUsd.innerText = `${totalValueInUsd.innerText} (${totalInUsdFormated})`
 
-  if (totalInUsd < 0) {
+  if (total.totalInUsd < 0) {
     totalValueInUsdCell.classList.remove('text-green-600', 'font-shadow-green')
     totalValueInUsdCell.classList.add('text-red-600')
+  }
+
+  // console.log(total)
+}
+
+function addHtmlWalletTokensSectionTopBar() {
+  const tokensSectionTopBarContainer = document.querySelector(
+    '#app-root > div > div:nth-child(2) > div > div:nth-child(3) > div:nth-child(2) > div > div:nth-child(2)'
+  )
+
+  const tokensSectionTopBar = document.createElement('div')
+  tokensSectionTopBar.id = 'tokensSectionTopBar'
+  tokensSectionTopBar.style.position = 'absolute'
+  tokensSectionTopBar.style.right = '20px'
+  tokensSectionTopBar.classList.add('flex', 'items-center', 'gap-4')
+
+  const tokensSectionTopBarTotalInUsd = document.createElement('div')
+  tokensSectionTopBarTotalInUsd.id = 'tokensSectionTopBarTotalInUsd'
+  // tokensSectionTopBarTotalInUsd.style.marginRight = '20px'
+  tokensSectionTopBarTotalInUsd.innerText = '0 USD'
+
+  tokensSectionTopBarTotalInUsd.classList.add(
+    'font-mono',
+    'text-sm',
+    'text-right',
+    'text-green-600',
+    'font-shadow-green'
+  )
+
+  const tokensSectionTopBarTotalInFocus = document.createElement('div')
+  tokensSectionTopBarTotalInFocus.id = 'tokensSectionTopBarTotalInFocus'
+  // tokensSectionTopBarTotalInFocus.style.marginRight = '20px'
+  tokensSectionTopBarTotalInFocus.innerText = '0 FOCUS'
+
+  tokensSectionTopBarTotalInFocus.classList.add(
+    'font-mono',
+    'text-sm',
+    'text-right',
+    'text-green-600',
+    'font-shadow-green'
+  )
+
+  tokensSectionTopBar.appendChild(tokensSectionTopBarTotalInUsd)
+  tokensSectionTopBar.appendChild(tokensSectionTopBarTotalInFocus)
+
+  tokensSectionTopBarContainer.style.position = 'relative'
+  tokensSectionTopBarContainer.appendChild(tokensSectionTopBar)
+}
+
+function updateHtmlWalletTokenSectionTopBar(total) {
+  const tokensSectionTopBarTotalInUsd = document.getElementById(
+    'tokensSectionTopBarTotalInUsd'
+  )
+
+  const tokensSectionTopBarTotalInFocus = document.getElementById(
+    'tokensSectionTopBarTotalInFocus'
+  )
+
+  const totalInUsdFormated = formatPrice(total.totalInUsd)
+  tokensSectionTopBarTotalInUsd.innerText = `${totalInUsdFormated} USD`
+
+  const totalInFocusFormated = formatPrice(total.totalInFocus)
+  tokensSectionTopBarTotalInFocus.innerText = `${totalInFocusFormated} FOCUS`
+
+  if (total.totalInUsd < 0) {
+    tokensSectionTopBarTotalInUsd.classList.add('text-red-600')
+
+    tokensSectionTopBarTotalInUsd.classList.remove(
+      'text-green-600',
+      'font-shadow-green'
+    )
+  }
+
+  if (total.totalInFocus < 0) {
+    tokensSectionTopBarTotalInFocus.classList.add('text-red-600')
+
+    tokensSectionTopBarTotalInFocus.classList.remove(
+      'text-green-600',
+      'font-shadow-green'
+    )
   }
 }
 
@@ -180,5 +261,7 @@ export {
   getHtmlHolderPublicKey,
   markHtmlWalletMyTokens,
   updateHtmlWalletMyTokenRow,
-  updateHtmlWalletMyTokenRowPnl
+  updateHtmlWalletMyTokenRowPnl,
+  addHtmlWalletTokensSectionTopBar,
+  updateHtmlWalletTokenSectionTopBar
 }

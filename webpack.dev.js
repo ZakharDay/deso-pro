@@ -8,9 +8,9 @@ module.exports = merge(common, {
   devtool: 'inline-source-map',
   watch: true,
   devServer: {
-    static: './dist'
+    static: './dev_build'
   },
   output: {
-    path: path.resolve(__dirname, 'dist')
+    path: path.resolve(__dirname, 'dev_build')
   }
 })

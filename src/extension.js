@@ -2,7 +2,9 @@ import {
   getHtmlHolderPublicKey,
   markHtmlWalletMyTokens,
   updateHtmlWalletMyTokenRow,
-  updateHtmlWalletMyTokenRowPnl
+  updateHtmlWalletMyTokenRowPnl,
+  addHtmlWalletTokensSectionTopBar,
+  updateHtmlWalletTokenSectionTopBar
 } from './javascript/openfund_wallet_html'
 
 import {
@@ -20,6 +22,9 @@ const usdcKey = 'BC1YLiwTN3DbkU8VmD7F7wXcRR1tFX6jDEkLyruHD2WsH3URomimxLX'
 
 let pageObserver
 let holderKey
+let totalInUsd = 0.0
+let totalInDeso = 0.0
+let totalInFocus = 0.0
 
 function observeUrlChange() {
   let lastUrl = location.href
@@ -66,6 +71,8 @@ function waitAsyncPageLoad() {
     if (document.head && document.body && currentPageDetector) {
       // console.log('DETECTOR LOADED')
 
+      addHtmlWalletTokensSectionTopBar()
+
       const container = document.getElementById(myTokensPanelId)
       holderKey = getHtmlHolderPublicKey()
 
@@ -79,6 +86,8 @@ function waitAsyncPageLoad() {
             const baseKey = holdingKey
             const promises = []
 
+            console.log(token.username, token)
+
             if (token.username != 'focus') {
               promises.push(
                 getApiMarketOrderData(
@@ -89,6 +98,14 @@ function waitAsyncPageLoad() {
                   token.username,
                   'FOCUS'
                 ).then((trade) => {
+                  console.log(
+                    'TRADE',
+                    'FOCUS',
+                    trade,
+                    token.username,
+                    token.quantity
+                  )
+
                   promises.push(
                     updateHtmlWalletMyTokenRow(tokenRow, token, 'FOCUS', trade)
                   )
@@ -105,6 +122,14 @@ function waitAsyncPageLoad() {
                 token.username,
                 'USDC'
               ).then((trade) => {
+                console.log(
+                  'TRADE',
+                  'USDC',
+                  trade,
+                  token.username,
+                  token.quantity
+                )
+
                 promises.push(
                   updateHtmlWalletMyTokenRow(tokenRow, token, 'USDC', trade)
                 )
@@ -120,6 +145,14 @@ function waitAsyncPageLoad() {
                 token.username,
                 'DESO'
               ).then((trade) => {
+                console.log(
+                  'TRADE',
+                  'DESO',
+                  trade,
+                  token.username,
+                  token.quantity
+                )
+
                 promises.push(
                   updateHtmlWalletMyTokenRow(tokenRow, token, 'DESO', trade)
                 )
@@ -129,8 +162,29 @@ function waitAsyncPageLoad() {
             Promise.all(promises).then(() => {
               getApiGqlTradingRecentTrades(holdingKey, holderKey).then(
                 (trades) => {
-                  const totalInUsd = processDataRecentTrades(trades)
-                  updateHtmlWalletMyTokenRowPnl(tokenRow, totalInUsd)
+                  const tokenPriceInQuoteCurrencyQuote = tokenRow.querySelector(
+                    '#tokenPriceInQuoteCurrencyQuote'
+                  )
+
+                  const quote = tokenPriceInQuoteCurrencyQuote.dataset.quote
+                  const total = processDataRecentTrades(trades, quote)
+
+                  updateHtmlWalletMyTokenRowPnl(tokenRow, total)
+
+                  if (
+                    token.username != 'focus' &&
+                    token.username != 'FOCUS_reservations' &&
+                    token.username != 'focus_classic'
+                  ) {
+                    collectTotal(total)
+                  }
+
+                  updateHtmlWalletTokenSectionTopBar({
+                    totalInUsd,
+                    totalInFocus
+                  })
+
+                  console.log(totalInUsd, totalInDeso, totalInFocus)
                 }
               )
             })
@@ -145,6 +199,22 @@ function waitAsyncPageLoad() {
       }, 100)
     }
   }
+}
+
+function collectTotal(total) {
+  Object.keys(total).forEach((key) => {
+    switch (key) {
+      case 'totalInUsd':
+        totalInUsd += total[key]
+        break
+      case 'totalInDeso':
+        totalInDeso += total[key]
+        break
+      case 'totalInFocus':
+        totalInFocus += total[key]
+        break
+    }
+  })
 }
 
 observeUrlChange()
