@@ -14,7 +14,8 @@ import {
   getTransferTransactions,
   setTransferTransactions,
   getTradingTransactions,
-  setTradingTransactions
+  setTradingTransactions,
+  setUserCounter
 } from './javascript/store'
 
 import {
@@ -28,11 +29,18 @@ import {
 } from './javascript/openfund_wallet_html'
 
 import {
+  preloadHtmlCounterFont,
+  addHtmlFocusUserCounter,
+  showHtmlFocusUserCounterPopup
+} from './javascript/focus_all_pages_html'
+
+import {
   getApiIsHodlingPublicKey,
   getApiMarketOrderData,
   getApiGqlTradingRecentTrades,
   getApiGqlTokenTradingRecentTrades,
-  getApiGqlDaoCoinTransfer
+  getApiGqlDaoCoinTransfer,
+  getApiGqlFocusUsersCount
 } from './javascript/openfund_api_requests'
 
 import {
@@ -48,8 +56,23 @@ import {
   usdcKey,
   desoKey,
   holdingsPanelId,
-  myTokensPanelId
+  myTokensPanelIds,
+  myTokensPanelSelector
 } from './javascript/constants'
+
+//
+//
+//
+//
+//
+//
+
+//
+//
+//
+//
+//
+//
 
 let pageObserver
 
@@ -79,24 +102,41 @@ function waitAsyncPageLoad() {
   const urlPart = pathname.substr(1)
   const urlPartFirstLetter = urlPart.charAt(0)
   const urlPartSecondLetter = urlPart.charAt(1)
-  const firstLettersAccepted = ['w', 'u', 'b', 'n', 's', 'b']
 
+  let table
   let currentPageDetector
 
   if (host == 'openfund.com' && urlPartFirstLetter == 'w') {
-    const table = document.getElementById(myTokensPanelId)
+    const firstLettersAccepted = ['w']
+    table = document.querySelector(myTokensPanelSelector)
 
     if (table) {
       currentPageDetector = table.querySelector('tbody tr')
     }
+
+    if (firstLettersAccepted.includes(urlPartFirstLetter)) {
+      if (document.head && document.body && currentPageDetector) {
+        // console.log('DETECTOR LOADED')
+        initOpenfundWalletPage(table)
+      } else {
+        // console.log('WILL REPEAT')
+        setTimeout(() => {
+          waitAsyncPageLoad()
+        }, 100)
+      }
+    }
   }
 
-  if (firstLettersAccepted.includes(urlPartFirstLetter)) {
+  if (host == 'focus.xyz') {
+    currentPageDetector = document.querySelector(
+      'main > div > div:last-child > div:first-child > div > div > div:first-child > a'
+    )
+
     if (document.head && document.body && currentPageDetector) {
-      // console.log('DETECTOR LOADED')
-      initOpenfundWalletPage(myTokensPanelId)
+      console.log('DETECTOR LOADED')
+      initFocusAllPage(currentPageDetector)
     } else {
-      // console.log('WILL REPEAT')
+      console.log('WILL REPEAT')
       setTimeout(() => {
         waitAsyncPageLoad()
       }, 100)
@@ -104,11 +144,10 @@ function waitAsyncPageLoad() {
   }
 }
 
-function initOpenfundWalletPage(myTokensPanelId) {
+function initOpenfundWalletPage(container) {
   OpenfundWalletController.getHolderKeyAndSetToStore()
   OpenfundWalletController.getFocusInvestedAndShowOnPage()
 
-  const container = document.getElementById(myTokensPanelId)
   const holderKey = getHolderKey()
 
   markHtmlWalletMyTokens(container).then((tokenRows) => {
@@ -198,6 +237,15 @@ function initOpenfundWalletPage(myTokensPanelId) {
         })
       })
     }
+  })
+}
+
+function initFocusAllPage(container) {
+  preloadHtmlCounterFont()
+
+  getApiGqlFocusUsersCount().then((counter) => {
+    setUserCounter(counter)
+    addHtmlFocusUserCounter(container)
   })
 }
 

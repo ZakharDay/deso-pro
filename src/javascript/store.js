@@ -5,6 +5,7 @@ let focusSold = 0
 let focusBought = 0
 let transferTransactions = []
 let tradingTransactions = []
+let userCounter = 0
 
 function getHolderKey() {
   return holderKey
@@ -62,6 +63,14 @@ function setTradingTransactions(transactions) {
   tradingTransactions = transactions
 }
 
+function getUserCounter() {
+  return userCounter
+}
+
+function setUserCounter(counter) {
+  userCounter = counter
+}
+
 export {
   getHolderKey,
   setHolderKey,
@@ -76,5 +85,7 @@ export {
   getTransferTransactions,
   setTransferTransactions,
   getTradingTransactions,
-  setTradingTransactions
+  setTradingTransactions,
+  getUserCounter,
+  setUserCounter
 }

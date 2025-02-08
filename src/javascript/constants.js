@@ -4,7 +4,9 @@ const usdcKey = 'BC1YLiwTN3DbkU8VmD7F7wXcRR1tFX6jDEkLyruHD2WsH3URomimxLX'
 const desoKey = 'BC1YLgk64us61PUyJ7iTEkV4y2GqpHSi8ejWJRnZwsX6XRTZSfUKsop'
 
 const holdingsPanelId = 'headlessui-tabs-panel-:rp:'
-const myTokensPanelId = 'headlessui-tabs-panel-:r11:'
+
+const myTokensPanelSelector =
+  '#app-root > div > div:last-child > div > div:last-child > div:last-child > div > div:last-child > div > div > div > table'
 
 export {
   focusKey,
@@ -12,5 +14,5 @@ export {
   usdcKey,
   desoKey,
   holdingsPanelId,
-  myTokensPanelId
+  myTokensPanelSelector
 }

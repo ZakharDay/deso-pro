@@ -195,7 +195,7 @@ function getApiGqlTradingRecentTrades(publicKey, offset = 0) {
     })
       .then((response) => {
         response.json().then((data) => {
-          console.log('Success:', data)
+          // console.log('Success:', data)
 
           const storedTradingTransactions = getTradingTransactions()
           storedTradingTransactions.push(...data.data.tradingRecentTrades.nodes)
@@ -254,7 +254,7 @@ function getApiGqlDaoCoinTransfer(publicKey, offset = 0) {
     })
       .then((response) => {
         response.json().then((data) => {
-          console.log('Success:', data)
+          // console.log('Success:', data)
 
           const storedTransferTransactions = getTransferTransactions()
           storedTransferTransactions.push(...data.data.affectedPublicKeys.nodes)
@@ -276,10 +276,43 @@ function getApiGqlDaoCoinTransfer(publicKey, offset = 0) {
   })
 }
 
+function getApiGqlFocusUsersCount() {
+  return new Promise((resolve, reject) => {
+    fetch(focusGqlUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        query:
+          'query UserAssociations($condition: UserAssociationCondition) {\n  userAssociations(condition: $condition) {\n    totalCount\n  }\n}',
+        variables: {
+          condition: {
+            associationType: 'NEW_USER_REFERRAL',
+            appPkid: 'BC1YLjEayZDjAPitJJX4Boy7LsEfN3sWAkYb3hgE9kGBirztsc2re1N'
+          }
+        },
+        operationName: 'UserAssociations'
+      })
+    })
+      .then((response) => {
+        response.json().then((data) => {
+          // console.log('Success:', data.data.userAssociations.totalCount, data)
+          resolve(data.data.userAssociations.totalCount)
+        })
+      })
+      .catch((error) => {
+        console.error('Error:', error)
+        reject()
+      })
+  })
+}
+
 export {
   getApiIsHodlingPublicKey,
   getApiMarketOrderData,
   getApiGqlTradingRecentTrades,
   getApiGqlTokenTradingRecentTrades,
-  getApiGqlDaoCoinTransfer
+  getApiGqlDaoCoinTransfer,
+  getApiGqlFocusUsersCount
 }
