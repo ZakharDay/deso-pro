@@ -18,7 +18,7 @@ import {
 
 import { hexNanosToNumber } from './calcs_and_formatters'
 
-function processDaoCoinTranferTransactions(transactions) {
+function processDataDaoCoinTranferTransactions(transactions) {
   return new Promise((resolve, reject) => {
     transactions.forEach((node) => {
       if (node.transaction.txIndexMetadata.CreatorUsername == 'focus') {
@@ -218,7 +218,7 @@ function processDataTokenRecentTrades(trades, quote) {
 }
 
 export {
-  processDaoCoinTranferTransactions,
+  processDataDaoCoinTranferTransactions,
   processDataRecentTrades,
   //
   //

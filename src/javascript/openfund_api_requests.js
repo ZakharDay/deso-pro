@@ -144,7 +144,7 @@ function getApiGqlTokenTradingRecentTrades(tokenPublicKey, traderPublicKey) {
               equalTo: traderPublicKey
             }
           },
-          first: 20,
+          first: 100,
           offset: 0
         },
         query:
@@ -202,20 +202,10 @@ function getApiGqlTradingRecentTrades(publicKey, offset = 0) {
           setTradingTransactions(storedTradingTransactions)
 
           if (data.data.tradingRecentTrades.pageInfo.hasNextPage) {
-            console.log(
-              'TRUE',
-              data.data.tradingRecentTrades.pageInfo.hasNextPage
-            )
-
             getApiGqlTradingRecentTrades(publicKey, offset + 100).then(() => {
               resolve()
             })
           } else {
-            console.log(
-              'FALSE',
-              data.data.tradingRecentTrades.pageInfo.hasNextPage
-            )
-
             resolve()
           }
         })
@@ -271,22 +261,11 @@ function getApiGqlDaoCoinTransfer(publicKey, offset = 0) {
           setTransferTransactions(storedTransferTransactions)
 
           if (data.data.affectedPublicKeys.pageInfo.hasNextPage) {
-            console.log(
-              'TRUE',
-              data.data.affectedPublicKeys.pageInfo.hasNextPage
-            )
-
             getApiGqlDaoCoinTransfer(publicKey, offset + 100).then(() => {
               resolve()
             })
           } else {
-            console.log(
-              'FALSE',
-              data.data.affectedPublicKeys.pageInfo.hasNextPage
-            )
-
             resolve()
-            // showHtmlFocusInvested()
           }
         })
       })

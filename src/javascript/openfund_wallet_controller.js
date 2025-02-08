@@ -18,7 +18,7 @@ import {
 
 import {
   processDataTradeTransactions,
-  processDaoCoinTranferTransactions
+  processDataDaoCoinTranferTransactions
 } from './data_modifiers'
 
 function getHolderKeyAndSetToStore() {
@@ -34,7 +34,7 @@ function getFocusInvestedAndShowOnPage() {
 
   const transferPromise = getApiGqlDaoCoinTransfer(holderKey).then(() => {
     const transactions = getTransferTransactions()
-    const processPromise = processDaoCoinTranferTransactions(transactions)
+    const processPromise = processDataDaoCoinTranferTransactions(transactions)
     promises.push(processPromise)
   })
 
@@ -48,7 +48,6 @@ function getFocusInvestedAndShowOnPage() {
 
   Promise.all(promises).then(() => {
     updateHtmlWalletTokenSectionTopBar()
-    // showHtmlFocusInvested()
   })
 }
 
