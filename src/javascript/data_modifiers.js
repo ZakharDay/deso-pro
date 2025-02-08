@@ -160,7 +160,7 @@ function processDataTradeTransactions(transactions) {
     //
     if (type == 'SELL' && quote == 'DESO') {
       if (token == 'focus') {
-        console.log('NEVER')
+        console.log('SELL focus for DESO')
         totalInFocus -= tradeSellQuantity
       }
 
@@ -169,7 +169,7 @@ function processDataTradeTransactions(transactions) {
 
     if (type == 'SELL' && quote == 'USDC') {
       if (token == 'DESO') {
-        console.log('NEVER')
+        console.log('SELL DESO for USDC')
 
         totalInDeso -= tradeSellQuantity
       }
@@ -188,37 +188,37 @@ function processDataTradeTransactions(transactions) {
 
     // console.log(`${token} ${type} with/for ${quote}`, transaction)
 
-    if (token == 'focus' || quote == 'FOCUS') {
-      let operator
-      let parameter
-      let sum
+    // if (token == 'focus' || quote == 'FOCUS') {
+    //   let operator
+    //   let parameter
+    //   let sum
 
-      if (type == 'BUY' && quote != 'FOCUS') {
-        operator = '+'
-        parameter = 'tradeBuyQuantity'
-        sum = tradeBuyQuantity
-      }
+    //   if (type == 'BUY' && quote != 'FOCUS') {
+    //     operator = '+'
+    //     parameter = 'tradeBuyQuantity'
+    //     sum = tradeBuyQuantity
+    //   }
 
-      if (type == 'BUY' && quote == 'FOCUS') {
-        operator = '-'
-        parameter = 'tradeBuyQuantity'
-        sum = tradeSellQuantity
-      }
+    //   if (type == 'BUY' && quote == 'FOCUS') {
+    //     operator = '-'
+    //     parameter = 'tradeBuyQuantity'
+    //     sum = tradeSellQuantity
+    //   }
 
-      if (type == 'SELL' && quote != 'FOCUS') {
-        operator = '-'
-        parameter = 'tradeBuyQuantity'
-        sum = tradeSellQuantity
-      }
+    //   if (type == 'SELL' && quote != 'FOCUS') {
+    //     operator = '-'
+    //     parameter = 'tradeBuyQuantity'
+    //     sum = tradeSellQuantity
+    //   }
 
-      if (type == 'SELL' && quote == 'FOCUS') {
-        operator = '+'
-        parameter = 'tradeBuyQuantity'
-        sum = tradeBuyQuantity
-      }
+    //   if (type == 'SELL' && quote == 'FOCUS') {
+    //     operator = '+'
+    //     parameter = 'tradeBuyQuantity'
+    //     sum = tradeBuyQuantity
+    //   }
 
-      console.log(type, token, quote, operator, parameter, sum, transaction)
-    }
+    //   console.log(type, token, quote, operator, parameter, sum, transaction)
+    // }
   })
 
   console.log(
@@ -229,6 +229,8 @@ function processDataTradeTransactions(transactions) {
     'FOCUS: ',
     totalInFocus
   )
+
+  return { totalInUsdc, totalInDeso, totalInFocus }
 
   // denominatedCoinPublicKey: 'BC1YLjEayZDjAPitJJX4Boy7LsEfN3sWAkYb3hgE9kGBirztsc2re1N'
   // tokenCategory: 'MEME'

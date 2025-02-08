@@ -37,6 +37,8 @@ let totalInUsdc = 0.0
 let totalInDeso = 0.0
 let totalInFocus = 0.0
 
+let newTotalInFocus = 0
+
 function observeUrlChange() {
   let lastUrl = location.href
 
@@ -230,7 +232,7 @@ function initOpenfundWalletPage(myTokensPanelId) {
 
     Promise.all(promises).then(() => {
       // console.log(transactions)
-      processDataTradeTransactions(transactions)
+      newTotalInFocus = processDataTradeTransactions(transactions).totalInFocus
     })
   })
 }
@@ -254,36 +256,45 @@ function collectTotal(total) {
 observeUrlChange()
 waitAsyncPageLoad()
 
-let transactionsOffset = 0
 let transferTransactions = []
 let transactionCallPromises = []
 
 function getPageDaoCoinTransactions(offset) {
-  // return new Promise((resolve, reject) => {
   return getDaoCoinTransfer(offset).then((data) => {
     transferTransactions.push(...data.data.affectedPublicKeys.nodes)
-
-    console.log(data.data.affectedPublicKeys.pageInfo.hasNextPage)
 
     if (data.data.affectedPublicKeys.pageInfo.hasNextPage) {
       transactionCallPromises.push(getPageDaoCoinTransactions(offset + 100))
     } else {
       renderTransactions()
     }
-
-    // resolve()
   })
-  // })
 }
 
-// transactionCallPromises.push(getPageDaoCoinTransactions(0))
-
-// Promise.all(transactionCallPromises).then(() => {
-//   console.log('YO', transferTransactions.length, transferTransactions)
-// })
-
 function renderTransactions() {
-  console.log('YO', transferTransactions.length, transferTransactions)
+  let totalFocusTransfer = 0
+
+  transferTransactions.forEach((node, index) => {
+    if (node.transaction.txIndexMetadata.CreatorUsername == 'focus') {
+      if (
+        node.metadata == 'ReceiverPublicKey' &&
+        node.transaction.account.username != 'focus_classic'
+      ) {
+        totalFocusTransfer += Number(
+          node.transaction.txIndexMetadata.DAOCoinToTransferNanos
+        )
+      } else if (node.metadata == 'TransactorPublicKeyBase58Check') {
+        totalFocusTransfer -= Number(
+          node.transaction.txIndexMetadata.DAOCoinToTransferNanos
+        )
+      }
+    }
+  })
+
+  newTotalInFocus += totalFocusTransfer / 1000000000000000000
+
+  console.log('totalFocusTransfer', totalFocusTransfer / 1000000000000000000)
+  console.log('newTotalInFocus', newTotalInFocus)
 }
 
 getPageDaoCoinTransactions(0)
