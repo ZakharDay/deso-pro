@@ -1,5 +1,12 @@
 import { formatPrice } from './calcs_and_formatters'
 
+import {
+  getFocusBought,
+  getFocusReceived,
+  getFocusSold,
+  getFocusTransfered
+} from './store'
+
 function getHtmlHolderPublicKey() {
   return document.querySelector('button.rounded-md').title
 }
@@ -190,72 +197,101 @@ function addHtmlWalletTokensSectionTopBar() {
   tokensSectionTopBar.style.right = '20px'
   tokensSectionTopBar.classList.add('flex', 'items-center', 'gap-4')
 
-  const tokensSectionTopBarTotalInUsd = document.createElement('div')
-  tokensSectionTopBarTotalInUsd.id = 'tokensSectionTopBarTotalInUsd'
-  // tokensSectionTopBarTotalInUsd.style.marginRight = '20px'
-  tokensSectionTopBarTotalInUsd.innerText = '0 USD'
+  // const tokensSectionTopBarTotalInUsd = document.createElement('div')
+  // tokensSectionTopBarTotalInUsd.id = 'tokensSectionTopBarTotalInUsd'
+  // // tokensSectionTopBarTotalInUsd.style.marginRight = '20px'
+  // tokensSectionTopBarTotalInUsd.innerText = '0 USD'
 
-  tokensSectionTopBarTotalInUsd.classList.add(
-    'font-mono',
-    'text-sm',
-    'text-right',
-    'text-green-600',
-    'font-shadow-green'
-  )
+  // tokensSectionTopBarTotalInUsd.classList.add(
+  //   'font-mono',
+  //   'text-sm',
+  //   'text-right',
+  //   'text-green-600',
+  //   'font-shadow-green'
+  // )
 
   const tokensSectionTopBarTotalInFocus = document.createElement('div')
   tokensSectionTopBarTotalInFocus.id = 'tokensSectionTopBarTotalInFocus'
   // tokensSectionTopBarTotalInFocus.style.marginRight = '20px'
-  tokensSectionTopBarTotalInFocus.innerText = '0 FOCUS'
+  tokensSectionTopBarTotalInFocus.innerText = 'Loading data...'
 
   tokensSectionTopBarTotalInFocus.classList.add(
     'font-mono',
     'text-sm',
-    'text-right',
-    'text-green-600',
-    'font-shadow-green'
+    'text-right'
+    // 'text-green-600',
+    // 'font-shadow-green'
   )
 
-  tokensSectionTopBar.appendChild(tokensSectionTopBarTotalInUsd)
+  // tokensSectionTopBar.appendChild(tokensSectionTopBarTotalInUsd)
   tokensSectionTopBar.appendChild(tokensSectionTopBarTotalInFocus)
 
   tokensSectionTopBarContainer.style.position = 'relative'
   tokensSectionTopBarContainer.appendChild(tokensSectionTopBar)
 }
 
-function updateHtmlWalletTokenSectionTopBar(total) {
-  const tokensSectionTopBarTotalInUsd = document.getElementById(
-    'tokensSectionTopBarTotalInUsd'
-  )
+function updateHtmlWalletTokenSectionTopBar() {
+  const focusBought = getFocusBought()
+  const focusSold = getFocusSold()
+  const focusReceived = getFocusReceived()
+  const focusTransfered = getFocusTransfered()
+
+  const focusInitial = focusReceived + focusBought
+  const focusHeld = focusBought + focusReceived - focusSold - focusTransfered
+  const focusInvested = focusHeld - focusInitial
+
+  // const tokensSectionTopBarTotalInUsd = document.getElementById(
+  //   'tokensSectionTopBarTotalInUsd'
+  // )
 
   const tokensSectionTopBarTotalInFocus = document.getElementById(
     'tokensSectionTopBarTotalInFocus'
   )
 
-  const totalInUsdFormated = formatPrice(total.totalInUsd)
-  tokensSectionTopBarTotalInUsd.innerText = `${totalInUsdFormated} USD`
+  // const totalInUsdFormated = formatPrice(total.totalInUsd)
+  // tokensSectionTopBarTotalInUsd.innerText = `${totalInUsdFormated} USD`
 
-  const totalInFocusFormated = formatPrice(total.totalInFocus)
-  tokensSectionTopBarTotalInFocus.innerText = `${totalInFocusFormated} FOCUS`
+  const focusInvestedFormated = formatPrice(focusInvested)
+  tokensSectionTopBarTotalInFocus.innerText = `${focusInvestedFormated} FOCUS`
 
-  if (total.totalInUsd < 0) {
-    tokensSectionTopBarTotalInUsd.classList.add('text-red-600')
+  // if (total.totalInUsd < 0) {
+  //   tokensSectionTopBarTotalInUsd.classList.add('text-red-600')
 
-    tokensSectionTopBarTotalInUsd.classList.remove(
-      'text-green-600',
-      'font-shadow-green'
-    )
-  }
+  //   tokensSectionTopBarTotalInUsd.classList.remove(
+  //     'text-green-600',
+  //     'font-shadow-green'
+  //   )
+  // }
 
-  if (total.totalInFocus < 0) {
+  if (focusInvested < 0) {
     tokensSectionTopBarTotalInFocus.classList.add('text-red-600')
 
     tokensSectionTopBarTotalInFocus.classList.remove(
       'text-green-600',
       'font-shadow-green'
     )
+  } else {
+    tokensSectionTopBarTotalInFocus.classList.add(
+      'text-green-600',
+      'font-shadow-green'
+    )
+
+    tokensSectionTopBarTotalInFocus.classList.remove('text-red-600')
   }
 }
+
+// function showHtmlFocusInvested() {
+//   console.log(
+//     getFocusBought(),
+//     getFocusSold(),
+//     getFocusReceived(),
+//     getFocusTransfered(),
+//     getFocusBought() +
+//       getFocusReceived() -
+//       getFocusSold() -
+//       getFocusTransfered()
+//   )
+// }
 
 export {
   getHtmlHolderPublicKey,

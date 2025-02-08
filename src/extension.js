@@ -1,4 +1,21 @@
-import { getDaoCoinTransfer } from './javascript/test_call'
+import { OpenfundWalletController } from './javascript/openfund_wallet_controller'
+
+import {
+  getHolderKey,
+  setHolderKey,
+  getFocusReceived,
+  setFocusReceived,
+  getFocusTransfered,
+  setFocusTransfered,
+  getFocusSold,
+  setFocusSold,
+  getFocusBought,
+  setFocusBought,
+  getTransferTransactions,
+  setTransferTransactions,
+  getTradingTransactions,
+  setTradingTransactions
+} from './javascript/store'
 
 import {
   getHtmlHolderPublicKey,
@@ -6,18 +23,23 @@ import {
   updateHtmlWalletMyTokenRow,
   updateHtmlWalletMyTokenRowPnl,
   addHtmlWalletTokensSectionTopBar,
-  updateHtmlWalletTokenSectionTopBar
+  updateHtmlWalletTokenSectionTopBar,
+  showHtmlFocusInvested
 } from './javascript/openfund_wallet_html'
 
 import {
   getApiIsHodlingPublicKey,
   getApiMarketOrderData,
-  getApiGqlTradingRecentTrades
+  getApiGqlTradingRecentTrades,
+  getApiGqlTokenTradingRecentTrades,
+  getApiGqlDaoCoinTransfer
 } from './javascript/openfund_api_requests'
 
 import {
+  processDaoCoinTranferTransactions,
   processDataRecentTrades,
-  processDataTradeTransactions
+  processDataTradeTransactions,
+  processDataTokenRecentTrades
 } from './javascript/data_modifiers'
 
 import {
@@ -30,7 +52,6 @@ import {
 } from './javascript/constants'
 
 let pageObserver
-let holderKey
 let transactions = []
 let totalInUsd = 0.0
 let totalInUsdc = 0.0
@@ -91,41 +112,44 @@ function waitAsyncPageLoad() {
 }
 
 function initOpenfundWalletPage(myTokensPanelId) {
-  addHtmlWalletTokensSectionTopBar()
+  OpenfundWalletController.getHolderKeyAndSetToStore()
+  OpenfundWalletController.getFocusInvestedAndShowOnPage()
 
   const container = document.getElementById(myTokensPanelId)
-  holderKey = getHtmlHolderPublicKey()
+  const holderKey = getHolderKey()
 
   markHtmlWalletMyTokens(container).then((tokenRows) => {
-    const keys = [focusKey, desoProxyKey, usdcKey, desoKey]
-    const promises = []
+    // const keys = [focusKey, desoProxyKey, usdcKey, desoKey]
+    // const promises = []
 
-    keys.forEach((key) => {
-      promises.push(
-        getApiGqlTradingRecentTrades(key, holderKey).then((trades) => {
-          // console.log(trades.data.tradingRecentTrades.nodes)
+    // keys.forEach((key) => {
+    //   promises.push(
+    //     getApiGqlTradingRecentTrades(key, holderKey).then((trades) => {
+    //       // console.log(trades.data.tradingRecentTrades.nodes)
 
-          trades.data.tradingRecentTrades.nodes.forEach((transaction) => {
-            transactions.push(transaction)
-          })
-        })
-      )
-    })
+    //       trades.data.tradingRecentTrades.nodes.forEach((transaction) => {
+    //         transactions.push(transaction)
+    //       })
+    //     })
+    //   )
+    // })
+    // const transactions = getTradingTransactions()
+    // const promises = []
 
     for (let index = 0; index < tokenRows.length; index++) {
       const tokenRow = tokenRows[index]
       const holdingKey = tokenRow.dataset.publicKey
 
       //
-      promises.push(
-        getApiGqlTradingRecentTrades(holdingKey, holderKey).then((trades) => {
-          // console.log(trades.data.tradingRecentTrades.nodes)
+      // promises.push(
+      //   getApiGqlTradingRecentTrades(holdingKey, holderKey).then((trades) => {
+      //     // console.log(trades.data.tradingRecentTrades.nodes)
 
-          trades.data.tradingRecentTrades.nodes.forEach((transaction) => {
-            transactions.push(transaction)
-          })
-        })
-      )
+      //     trades.data.tradingRecentTrades.nodes.forEach((transaction) => {
+      //       transactions.push(transaction)
+      //     })
+      //   })
+      // )
       //
       //
       // getAllTransactions and store them for future
@@ -201,194 +225,61 @@ function initOpenfundWalletPage(myTokensPanelId) {
         )
 
         Promise.all(promises).then(() => {
-          getApiGqlTradingRecentTrades(holdingKey, holderKey).then((trades) => {
-            const tokenPriceInQuoteCurrencyQuote = tokenRow.querySelector(
-              '#tokenPriceInQuoteCurrencyQuote'
-            )
+          getApiGqlTokenTradingRecentTrades(holdingKey, holderKey).then(
+            (trades) => {
+              const tokenPriceInQuoteCurrencyQuote = tokenRow.querySelector(
+                '#tokenPriceInQuoteCurrencyQuote'
+              )
 
-            const quote = tokenPriceInQuoteCurrencyQuote.dataset.quote
-            const total = processDataRecentTrades(trades, quote)
+              const quote = tokenPriceInQuoteCurrencyQuote.dataset.quote
+              const total = processDataTokenRecentTrades(trades, quote)
 
-            updateHtmlWalletMyTokenRowPnl(tokenRow, total)
+              updateHtmlWalletMyTokenRowPnl(tokenRow, total)
 
-            if (
-              token.username != 'focus' &&
-              token.username != 'FOCUS_reservations' &&
-              token.username != 'focus_classic'
-            ) {
-              collectTotal(total)
+              // if (
+              //   token.username != 'focus' &&
+              //   token.username != 'FOCUS_reservations' &&
+              //   token.username != 'focus_classic'
+              // ) {
+              //   collectTotal(total)
+              // }
+
+              // updateHtmlWalletTokenSectionTopBar({
+              //   totalInUsd,
+              //   totalInFocus
+              // })
+
+              // console.log(totalInUsd, totalInDeso, totalInFocus)
             }
-
-            updateHtmlWalletTokenSectionTopBar({
-              totalInUsd,
-              totalInFocus
-            })
-
-            // console.log(totalInUsd, totalInDeso, totalInFocus)
-          })
+          )
         })
       })
     }
 
-    Promise.all(promises).then(() => {
-      // console.log(transactions)
-      newTotalInFocus = processDataTradeTransactions(transactions).totalInFocus
-    })
+    // Promise.all(promises).then(() => {
+    //   // console.log(transactions)
+    //   processDataTradeTransactions(transactions)
+    // })
   })
 }
 
-function collectTotal(total) {
-  Object.keys(total).forEach((key) => {
-    switch (key) {
-      case 'totalInUsd':
-        totalInUsd += total[key]
-        break
-      case 'totalInDeso':
-        totalInDeso += total[key]
-        break
-      case 'totalInFocus':
-        totalInFocus += total[key]
-        break
-    }
-  })
-}
+// function collectTotal(total) {
+//   Object.keys(total).forEach((key) => {
+//     switch (key) {
+//       case 'totalInUsd':
+//         totalInUsd += total[key]
+//         break
+//       case 'totalInDeso':
+//         totalInDeso += total[key]
+//         break
+//       case 'totalInFocus':
+//         totalInFocus += total[key]
+//         break
+//     }
+//   })
+// }
 
 observeUrlChange()
 waitAsyncPageLoad()
 
-let transferTransactions = []
-let transactionCallPromises = []
-
-function getPageDaoCoinTransactions(offset) {
-  return getDaoCoinTransfer(offset).then((data) => {
-    transferTransactions.push(...data.data.affectedPublicKeys.nodes)
-
-    if (data.data.affectedPublicKeys.pageInfo.hasNextPage) {
-      transactionCallPromises.push(getPageDaoCoinTransactions(offset + 100))
-    } else {
-      renderTransactions()
-    }
-  })
-}
-
-function renderTransactions() {
-  let totalFocusTransfer = 0
-
-  transferTransactions.forEach((node, index) => {
-    if (node.transaction.txIndexMetadata.CreatorUsername == 'focus') {
-      if (
-        node.metadata == 'ReceiverPublicKey' &&
-        node.transaction.account.username != 'focus_classic'
-      ) {
-        totalFocusTransfer += Number(
-          node.transaction.txIndexMetadata.DAOCoinToTransferNanos
-        )
-      } else if (node.metadata == 'TransactorPublicKeyBase58Check') {
-        totalFocusTransfer -= Number(
-          node.transaction.txIndexMetadata.DAOCoinToTransferNanos
-        )
-      }
-    }
-  })
-
-  newTotalInFocus += totalFocusTransfer / 1000000000000000000
-
-  console.log('totalFocusTransfer', totalFocusTransfer / 1000000000000000000)
-  console.log('newTotalInFocus', newTotalInFocus)
-}
-
-getPageDaoCoinTransactions(0)
-
-// function getPageDaoCoinTransactions(offset) {
-//   return new Promise((resolve, reject) => {
-//     getDaoCoinTransfer(offset).then((data) => {
-//       transferTransactions.push(...data.data.affectedPublicKeys.nodes)
-
-//       console.log(data.data.affectedPublicKeys.pageInfo.hasNextPage)
-
-//       if (data.data.affectedPublicKeys.pageInfo.hasNextPage) {
-//         getPageDaoCoinTransactions(offset + 100)
-//       } else {
-//         console.log('getPageDaoCoinTransactions RESOLVE')
-//       }
-
-//       resolve()
-//     })
-//   })
-// }
-
-// getPageDaoCoinTransactions(0).then(() => {
-//   console.log('YO')
-// })
-
-// transactionCallPromises.push(getDaoCoinTransfer(offset))
-
-// getDaoCoinTransfer(offset).then((data) => {
-//   transferTransactions.push(...data.data.affectedPublicKeys.nodes)
-
-//   if (data.data.affectedPublicKeys.pageInfo.hasNextPage) {
-//     transactionCallPromises.push(getDaoCoinTransfer(offset + 100))
-//   // } else {
-//   //   console.log('getPageDaoCoinTransactions RESOLVE')
-
-//   //   resolve()
-//   }
-// })
-
-// function getAllDaoCoinTransactions(offset) {
-//   // return new Promise((resolve, reject) => {
-//   return getPageDaoCoinTransactions(offset)
-//   // .then(() => {
-//   // console.log('getPageDaoCoinTransactions RESOLVE')
-
-//   // resolve()
-//   // })
-//   // })
-// }
-
-// function getPageDaoCoinTransactions(offset) {
-//   // return new Promise((resolve, reject) => {
-//   return getDaoCoinTransfer(offset).then((data) => {
-//     transferTransactions.push(...data.data.affectedPublicKeys.nodes)
-
-//     if (data.data.affectedPublicKeys.pageInfo.hasNextPage) {
-//       getDaoCoinTransfer(offset + 100)
-//     } else {
-//       console.log('getPageDaoCoinTransactions RESOLVE')
-
-//       resolve()
-//     }
-//   })
-//   // })
-// }
-
-// getAllDaoCoinTransactions(0).then(() => {
-//   console.log(
-//     'transferTransactions',
-//     transferTransactions.length,
-//     transferTransactions
-//   )
-// })
-
-// getDaoCoinTransfer(transactionsOffset).then((data) => {
-//   transferTransactions.push(...data.data.transactions.nodes)
-
-//   if (data.affectedPublicKeys.pageInfo.hasNextPage) {
-//     transactionsOffset += 100
-//     getDaoCoinTransfer()
-//   }
-
-//   // let totalFocusTransfer = 0
-
-//   // data.data.transactions.nodes.forEach((transaction) => {
-//   //   if (transaction.txIndexMetadata.CreatorUsername == 'focus') {
-//   //     totalFocusTransfer += Number(
-//   //       transaction.txIndexMetadata.DAOCoinToTransferNanos
-//   //     )
-//   //   }
-//   // })
-
-//   // data.affectedPublicKeys.pageInfo.hasNextPage
-
-//   console.log('totalFocusTransfer', totalFocusTransfer / 1000000000000000000)
-// })
+// processDaoCoinTranferTransactions

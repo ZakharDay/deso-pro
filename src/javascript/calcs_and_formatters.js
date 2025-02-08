@@ -7,4 +7,8 @@ function formatPrice(price, fraction) {
   })
 }
 
-export { formatPrice }
+function hexNanosToNumber(hex) {
+  return Number(hex) / 1000000000000000000
+}
+
+export { formatPrice, hexNanosToNumber }
