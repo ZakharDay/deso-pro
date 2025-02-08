@@ -52,13 +52,6 @@ import {
 } from './javascript/constants'
 
 let pageObserver
-let transactions = []
-let totalInUsd = 0.0
-let totalInUsdc = 0.0
-let totalInDeso = 0.0
-let totalInFocus = 0.0
-
-let newTotalInFocus = 0
 
 function observeUrlChange() {
   let lastUrl = location.href
@@ -119,44 +112,9 @@ function initOpenfundWalletPage(myTokensPanelId) {
   const holderKey = getHolderKey()
 
   markHtmlWalletMyTokens(container).then((tokenRows) => {
-    // const keys = [focusKey, desoProxyKey, usdcKey, desoKey]
-    // const promises = []
-
-    // keys.forEach((key) => {
-    //   promises.push(
-    //     getApiGqlTradingRecentTrades(key, holderKey).then((trades) => {
-    //       // console.log(trades.data.tradingRecentTrades.nodes)
-
-    //       trades.data.tradingRecentTrades.nodes.forEach((transaction) => {
-    //         transactions.push(transaction)
-    //       })
-    //     })
-    //   )
-    // })
-    // const transactions = getTradingTransactions()
-    // const promises = []
-
     for (let index = 0; index < tokenRows.length; index++) {
       const tokenRow = tokenRows[index]
       const holdingKey = tokenRow.dataset.publicKey
-
-      //
-      // promises.push(
-      //   getApiGqlTradingRecentTrades(holdingKey, holderKey).then((trades) => {
-      //     // console.log(trades.data.tradingRecentTrades.nodes)
-
-      //     trades.data.tradingRecentTrades.nodes.forEach((transaction) => {
-      //       transactions.push(transaction)
-      //     })
-      //   })
-      // )
-      //
-      //
-      // getAllTransactions and store them for future
-      //
-      //
-      //
-      // transactions.push()
 
       getApiIsHodlingPublicKey(holderKey, holdingKey).then((token) => {
         const transactorKey = holderKey
@@ -235,51 +193,13 @@ function initOpenfundWalletPage(myTokensPanelId) {
               const total = processDataTokenRecentTrades(trades, quote)
 
               updateHtmlWalletMyTokenRowPnl(tokenRow, total)
-
-              // if (
-              //   token.username != 'focus' &&
-              //   token.username != 'FOCUS_reservations' &&
-              //   token.username != 'focus_classic'
-              // ) {
-              //   collectTotal(total)
-              // }
-
-              // updateHtmlWalletTokenSectionTopBar({
-              //   totalInUsd,
-              //   totalInFocus
-              // })
-
-              // console.log(totalInUsd, totalInDeso, totalInFocus)
             }
           )
         })
       })
     }
-
-    // Promise.all(promises).then(() => {
-    //   // console.log(transactions)
-    //   processDataTradeTransactions(transactions)
-    // })
   })
 }
 
-// function collectTotal(total) {
-//   Object.keys(total).forEach((key) => {
-//     switch (key) {
-//       case 'totalInUsd':
-//         totalInUsd += total[key]
-//         break
-//       case 'totalInDeso':
-//         totalInDeso += total[key]
-//         break
-//       case 'totalInFocus':
-//         totalInFocus += total[key]
-//         break
-//     }
-//   })
-// }
-
 observeUrlChange()
 waitAsyncPageLoad()
-
-// processDaoCoinTranferTransactions

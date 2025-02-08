@@ -197,6 +197,10 @@ function addHtmlWalletTokensSectionTopBar() {
   tokensSectionTopBar.style.right = '20px'
   tokensSectionTopBar.classList.add('flex', 'items-center', 'gap-4')
 
+  const tokensSectionTopBarTitle = document.createElement('div')
+  tokensSectionTopBarTitle.id = 'tokensSectionTopBarTitle'
+  tokensSectionTopBarTitle.classList.add('font-mono', 'text-sm', 'text-right')
+
   // const tokensSectionTopBarTotalInUsd = document.createElement('div')
   // tokensSectionTopBarTotalInUsd.id = 'tokensSectionTopBarTotalInUsd'
   // // tokensSectionTopBarTotalInUsd.style.marginRight = '20px'
@@ -224,6 +228,7 @@ function addHtmlWalletTokensSectionTopBar() {
   )
 
   // tokensSectionTopBar.appendChild(tokensSectionTopBarTotalInUsd)
+  tokensSectionTopBar.appendChild(tokensSectionTopBarTitle)
   tokensSectionTopBar.appendChild(tokensSectionTopBarTotalInFocus)
 
   tokensSectionTopBarContainer.style.position = 'relative'
@@ -239,6 +244,12 @@ function updateHtmlWalletTokenSectionTopBar() {
   const focusInitial = focusReceived + focusBought
   const focusHeld = focusBought + focusReceived - focusSold - focusTransfered
   const focusInvested = focusHeld - focusInitial
+
+  const tokensSectionTopBarTitle = document.getElementById(
+    'tokensSectionTopBarTitle'
+  )
+
+  tokensSectionTopBarTitle.innerText = 'Total PNL:'
 
   // const tokensSectionTopBarTotalInUsd = document.getElementById(
   //   'tokensSectionTopBarTotalInUsd'
