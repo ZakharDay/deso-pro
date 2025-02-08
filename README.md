@@ -6,13 +6,20 @@ DeSo Pro is a Chrome extension that updates your Openfund Wallet page. Openfund 
 
 [Install it from the Chrome Web Store](https://chromewebstore.google.com/detail/deso-pro/aeelpicjlmhanfiplnhpldceecebiohi)
 
-Features on the Openfund Wallet page:
+Features on Openfund Wallet page:
 
 - Updates token price in USD
 - Updates token price in DESO or FOCUS
 - Updates your value of holding in USD
 - Updates your value of holding in DESO or FOCUS
 - Adds token trading fee percentage
+- Adds token PNL in USD
+- Adds total PNL in $Focus
+
+Features on Focus:
+
+- Users counter under the logo
+- Fullscreen users counter (click on small counter)
 
 New features coming soon
 
