@@ -3,6 +3,7 @@ let focusReceived = 0
 let focusTransfered = 0
 let focusSold = 0
 let focusBought = 0
+let focusInPosition = 0
 let transferTransactions = []
 let tradingTransactions = []
 let userCounter = 0
@@ -47,6 +48,14 @@ function setFocusBought(quantity) {
   focusBought = quantity
 }
 
+function getFocusInPosition() {
+  return focusInPosition
+}
+
+function setFocusInPosition(quantity) {
+  focusInPosition = quantity
+}
+
 function getTransferTransactions() {
   return transferTransactions
 }
@@ -82,6 +91,8 @@ export {
   setFocusSold,
   getFocusBought,
   setFocusBought,
+  getFocusInPosition,
+  setFocusInPosition,
   getTransferTransactions,
   setTransferTransactions,
   getTradingTransactions,

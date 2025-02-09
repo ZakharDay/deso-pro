@@ -11,6 +11,8 @@ import {
   setFocusSold,
   getFocusBought,
   setFocusBought,
+  getFocusInPosition,
+  setFocusInPosition,
   getTransferTransactions,
   setTransferTransactions,
   getTradingTransactions,
@@ -179,6 +181,14 @@ function initOpenfundWalletPage(container) {
               //   token.username,
               //   token.quantity
               // )
+
+              // console.log(trade)
+              const focusInPositionStored = getFocusInPosition()
+              const focusInPosition = trade['ExecutionReceiveAmount']
+
+              setFocusInPosition(
+                focusInPositionStored + Number(focusInPosition)
+              )
 
               promises.push(
                 updateHtmlWalletMyTokenRow(tokenRow, token, 'FOCUS', trade)

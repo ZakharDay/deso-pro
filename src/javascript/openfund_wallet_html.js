@@ -1,10 +1,11 @@
-import { formatPrice } from './calcs_and_formatters'
+import { formatPrice, hexNanosToNumber } from './calcs_and_formatters'
 
 import {
   getFocusBought,
   getFocusReceived,
   getFocusSold,
-  getFocusTransfered
+  getFocusTransfered,
+  getFocusInPosition
 } from './store'
 
 function getHtmlHolderPublicKey() {
@@ -195,41 +196,51 @@ function addHtmlWalletTokensSectionTopBar() {
   tokensSectionTopBar.id = 'tokensSectionTopBar'
   tokensSectionTopBar.style.position = 'absolute'
   tokensSectionTopBar.style.right = '20px'
-  tokensSectionTopBar.classList.add('flex', 'items-center', 'gap-4')
-
-  const tokensSectionTopBarTitle = document.createElement('div')
-  tokensSectionTopBarTitle.id = 'tokensSectionTopBarTitle'
-  tokensSectionTopBarTitle.classList.add('font-mono', 'text-sm', 'text-right')
-
-  // const tokensSectionTopBarTotalInUsd = document.createElement('div')
-  // tokensSectionTopBarTotalInUsd.id = 'tokensSectionTopBarTotalInUsd'
-  // // tokensSectionTopBarTotalInUsd.style.marginRight = '20px'
-  // tokensSectionTopBarTotalInUsd.innerText = '0 USD'
-
-  // tokensSectionTopBarTotalInUsd.classList.add(
-  //   'font-mono',
-  //   'text-sm',
-  //   'text-right',
-  //   'text-green-600',
-  //   'font-shadow-green'
-  // )
-
-  const tokensSectionTopBarTotalInFocus = document.createElement('div')
-  tokensSectionTopBarTotalInFocus.id = 'tokensSectionTopBarTotalInFocus'
-  // tokensSectionTopBarTotalInFocus.style.marginRight = '20px'
-  tokensSectionTopBarTotalInFocus.innerText = 'Loading data...'
-
-  tokensSectionTopBarTotalInFocus.classList.add(
+  tokensSectionTopBar.classList.add(
+    'flex',
+    'items-center',
+    'gap-4',
     'font-mono',
-    'text-sm',
     'text-right'
-    // 'text-green-600',
-    // 'font-shadow-green'
   )
 
-  // tokensSectionTopBar.appendChild(tokensSectionTopBarTotalInUsd)
-  tokensSectionTopBar.appendChild(tokensSectionTopBarTitle)
-  tokensSectionTopBar.appendChild(tokensSectionTopBarTotalInFocus)
+  const tokensSectionTopBarNotice = document.createElement('div')
+  tokensSectionTopBarNotice.id = 'tokensSectionTopBarNotice'
+  tokensSectionTopBarNotice.classList.add('text-xs', 'text-muted')
+
+  const tokensSectionTopBarTitle1 = document.createElement('div')
+  tokensSectionTopBarTitle1.id = 'tokensSectionTopBarTitle1'
+  tokensSectionTopBarTitle1.classList.add('text-sm')
+
+  const tokensSectionTopBarTitle2 = document.createElement('div')
+  tokensSectionTopBarTitle2.id = 'tokensSectionTopBarTitle2'
+  tokensSectionTopBarTitle2.classList.add('text-sm')
+
+  const tokensSectionTopBarTitle3 = document.createElement('div')
+  tokensSectionTopBarTitle3.id = 'tokensSectionTopBarTitle3'
+  tokensSectionTopBarTitle3.classList.add('text-sm')
+
+  const tokensSectionTopBarTotal1 = document.createElement('div')
+  tokensSectionTopBarTotal1.id = 'tokensSectionTopBarTotal1'
+  tokensSectionTopBarTotal1.classList.add('text-sm')
+
+  const tokensSectionTopBarTotal2 = document.createElement('div')
+  tokensSectionTopBarTotal2.id = 'tokensSectionTopBarTotal2'
+  tokensSectionTopBarTotal2.classList.add('text-sm')
+
+  const tokensSectionTopBarTotal3 = document.createElement('div')
+  tokensSectionTopBarTotal3.id = 'tokensSectionTopBarTotal3'
+  tokensSectionTopBarTotal3.classList.add('text-sm')
+
+  tokensSectionTopBarTotal3.innerText = 'Loading data...'
+
+  tokensSectionTopBar.appendChild(tokensSectionTopBarNotice)
+  tokensSectionTopBar.appendChild(tokensSectionTopBarTitle1)
+  tokensSectionTopBar.appendChild(tokensSectionTopBarTotal1)
+  tokensSectionTopBar.appendChild(tokensSectionTopBarTitle2)
+  tokensSectionTopBar.appendChild(tokensSectionTopBarTotal2)
+  tokensSectionTopBar.appendChild(tokensSectionTopBarTitle3)
+  tokensSectionTopBar.appendChild(tokensSectionTopBarTotal3)
 
   tokensSectionTopBarContainer.style.position = 'relative'
   tokensSectionTopBarContainer.appendChild(tokensSectionTopBar)
@@ -240,54 +251,68 @@ function updateHtmlWalletTokenSectionTopBar() {
   const focusSold = getFocusSold()
   const focusReceived = getFocusReceived()
   const focusTransfered = getFocusTransfered()
+  const focusInPosition = getFocusInPosition()
 
   const focusInitial = focusReceived + focusBought
   const focusHeld = focusBought + focusReceived - focusSold - focusTransfered
   const focusInvested = focusHeld - focusInitial
+  const focusUnreleasedPnl = focusInvested + focusInPosition
 
-  const tokensSectionTopBarTitle = document.getElementById(
-    'tokensSectionTopBarTitle'
-  )
+  const focusInvestedFormatted = formatPrice(focusInvested)
+  const focusInPositionFormatted = formatPrice(focusInPosition)
+  const focusUnreleasedPnlFormatted = formatPrice(focusUnreleasedPnl)
 
-  tokensSectionTopBarTitle.innerText = 'Held in position:'
+  // prettier-ignore
+  const tokensSectionTopBarNotice = document.getElementById('tokensSectionTopBarNotice')
+  // prettier-ignore
+  const tokensSectionTopBarTitle1 = document.getElementById('tokensSectionTopBarTitle1')
+  // prettier-ignore
+  const tokensSectionTopBarTotal1 = document.getElementById('tokensSectionTopBarTotal1')
+  // prettier-ignore
+  const tokensSectionTopBarTitle2 = document.getElementById('tokensSectionTopBarTitle2')
+  // prettier-ignore
+  const tokensSectionTopBarTotal2 = document.getElementById('tokensSectionTopBarTotal2')
+  // prettier-ignore
+  const tokensSectionTopBarTitle3 = document.getElementById('tokensSectionTopBarTitle3')
+  // prettier-ignore
+  const tokensSectionTopBarTotal3 = document.getElementById('tokensSectionTopBarTotal3')
 
-  // const tokensSectionTopBarTotalInUsd = document.getElementById(
-  //   'tokensSectionTopBarTotalInUsd'
-  // )
+  tokensSectionTopBarNotice.innerText = 'Experimental'
+  tokensSectionTopBarTitle1.innerText = 'Invested in tokens:'
+  tokensSectionTopBarTotal1.innerText = `${focusInvestedFormatted} FOCUS`
+  tokensSectionTopBarTitle2.innerText = 'Current position:'
+  tokensSectionTopBarTotal2.innerText = `${focusInPositionFormatted} FOCUS`
+  tokensSectionTopBarTitle3.innerText = 'Unreleased PNL:'
+  tokensSectionTopBarTotal3.innerText = `${focusUnreleasedPnlFormatted} FOCUS`
 
-  const tokensSectionTopBarTotalInFocus = document.getElementById(
-    'tokensSectionTopBarTotalInFocus'
-  )
+  colorizeRedOrGreen(tokensSectionTopBarTotal1, focusInvested < 0)
+  colorizeRedOrGreen(tokensSectionTopBarTotal2, focusInPosition < 0)
+  colorizeRedOrGreen(tokensSectionTopBarTotal3, focusUnreleasedPnl < 0)
 
-  // const totalInUsdFormated = formatPrice(total.totalInUsd)
-  // tokensSectionTopBarTotalInUsd.innerText = `${totalInUsdFormated} USD`
+  // if (focusInvested < 0) {
+  //   tokensSectionTopBarTotal1.classList.add('text-red-600')
 
-  const focusInvestedFormated = formatPrice(focusInvested)
-  tokensSectionTopBarTotalInFocus.innerText = `${focusInvestedFormated} FOCUS`
-
-  // if (total.totalInUsd < 0) {
-  //   tokensSectionTopBarTotalInUsd.classList.add('text-red-600')
-
-  //   tokensSectionTopBarTotalInUsd.classList.remove(
+  //   tokensSectionTopBarTotal1.classList.remove(
   //     'text-green-600',
   //     'font-shadow-green'
   //   )
+  // } else {
+  //   tokensSectionTopBarTotal1.classList.add(
+  //     'text-green-600',
+  //     'font-shadow-green'
+  //   )
+
+  //   tokensSectionTopBarTotal1.classList.remove('text-red-600')
   // }
+}
 
-  if (focusInvested < 0) {
-    tokensSectionTopBarTotalInFocus.classList.add('text-red-600')
-
-    tokensSectionTopBarTotalInFocus.classList.remove(
-      'text-green-600',
-      'font-shadow-green'
-    )
+function colorizeRedOrGreen(element, statement) {
+  if (statement) {
+    element.classList.add('text-red-600')
+    element.classList.remove('text-green-600', 'font-shadow-green')
   } else {
-    tokensSectionTopBarTotalInFocus.classList.add(
-      'text-green-600',
-      'font-shadow-green'
-    )
-
-    tokensSectionTopBarTotalInFocus.classList.remove('text-red-600')
+    element.classList.add('text-green-600', 'font-shadow-green')
+    element.classList.remove('text-red-600')
   }
 }
 

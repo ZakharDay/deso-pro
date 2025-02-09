@@ -143,16 +143,6 @@ function processDataTradeTransactions(transactions) {
   })
 }
 
-function processDataRecentTrades(trades) {}
-
-//
-//
-//
-//
-//
-//
-//
-
 function processDataTokenRecentTrades(trades, quote) {
   let totalInUsd = 0
   let totalInFocus = 0
@@ -189,40 +179,13 @@ function processDataTokenRecentTrades(trades, quote) {
         totalInFocus += tradeBuyQuantity
       }
     }
-
-    // tradeBuyQuantity: 88580.39921466979
-    // tradePriceDeso: 0.04489487343417741
-    // tradePriceFocus: 764.162547004051
-    // tradePriceUsd: 0.6357114078279521
-    // tradeSellQuantity: 100
-    // tradeType: 'SELL'
-    // tradeValueDeso: 4.489487343417741
-    // tradeValueFocus: 76416.25470040512
-    // tradeValueUsd: 63.57114078279521
-
-    // tradeBuyQuantity: 933.9255554736633
-    // tradePriceDeso: 0.007269181776039969
-    // tradePriceFocus: 111.17574938841915
-    // tradePriceUsd: 0.10147777759351798
-    // tradeSellQuantity: 141519.4928561733
-    // tradeType: 'BUY'
-    // tradeValueDeso: 6.788874628027159
-    // tradeValueFocus: 103829.87350278014
-    // tradeValueUsd: 94.77268980725914
   })
-
-  // trades.data.tradingRecentTrades.pageInfo.hasNextPage
-  // trades.data.tradingRecentTrades.pageInfo.hasPreviousPage
 
   return { totalInUsd, totalInFocus, totalInDeso }
 }
 
 export {
   processDataDaoCoinTranferTransactions,
-  processDataRecentTrades,
-  //
-  //
-  //
   processDataTokenRecentTrades,
   processDataTradeTransactions
 }
