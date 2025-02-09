@@ -196,6 +196,7 @@ function addHtmlWalletTokensSectionTopBar() {
   tokensSectionTopBar.id = 'tokensSectionTopBar'
   tokensSectionTopBar.style.position = 'absolute'
   tokensSectionTopBar.style.right = '20px'
+
   tokensSectionTopBar.classList.add(
     'flex',
     'items-center',
@@ -288,22 +289,6 @@ function updateHtmlWalletTokenSectionTopBar() {
   colorizeRedOrGreen(tokensSectionTopBarTotal1, focusInvested < 0)
   colorizeRedOrGreen(tokensSectionTopBarTotal2, focusInPosition < 0)
   colorizeRedOrGreen(tokensSectionTopBarTotal3, focusUnreleasedPnl < 0)
-
-  // if (focusInvested < 0) {
-  //   tokensSectionTopBarTotal1.classList.add('text-red-600')
-
-  //   tokensSectionTopBarTotal1.classList.remove(
-  //     'text-green-600',
-  //     'font-shadow-green'
-  //   )
-  // } else {
-  //   tokensSectionTopBarTotal1.classList.add(
-  //     'text-green-600',
-  //     'font-shadow-green'
-  //   )
-
-  //   tokensSectionTopBarTotal1.classList.remove('text-red-600')
-  // }
 }
 
 function colorizeRedOrGreen(element, statement) {
@@ -315,19 +300,6 @@ function colorizeRedOrGreen(element, statement) {
     element.classList.remove('text-red-600')
   }
 }
-
-// function showHtmlFocusInvested() {
-//   console.log(
-//     getFocusBought(),
-//     getFocusSold(),
-//     getFocusReceived(),
-//     getFocusTransfered(),
-//     getFocusBought() +
-//       getFocusReceived() -
-//       getFocusSold() -
-//       getFocusTransfered()
-//   )
-// }
 
 export {
   getHtmlHolderPublicKey,

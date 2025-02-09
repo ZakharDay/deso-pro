@@ -1,6 +1,7 @@
 import { OpenfundWalletController } from './javascript/openfund_wallet_controller'
 
 import {
+  resetStore,
   getHolderKey,
   setHolderKey,
   getFocusReceived,
@@ -147,6 +148,8 @@ function waitAsyncPageLoad() {
 }
 
 function initOpenfundWalletPage(container) {
+  resetStore()
+
   OpenfundWalletController.getHolderKeyAndSetToStore()
   OpenfundWalletController.getFocusInvestedAndShowOnPage()
 

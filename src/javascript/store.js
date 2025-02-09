@@ -8,6 +8,18 @@ let transferTransactions = []
 let tradingTransactions = []
 let userCounter = 0
 
+function resetStore() {
+  holderKey = ''
+  focusReceived = 0
+  focusTransfered = 0
+  focusSold = 0
+  focusBought = 0
+  focusInPosition = 0
+  transferTransactions = []
+  tradingTransactions = []
+  userCounter = 0
+}
+
 function getHolderKey() {
   return holderKey
 }
@@ -81,6 +93,7 @@ function setUserCounter(counter) {
 }
 
 export {
+  resetStore,
   getHolderKey,
   setHolderKey,
   getFocusReceived,
