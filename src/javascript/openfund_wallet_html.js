@@ -249,7 +249,7 @@ function updateHtmlWalletTokenSectionTopBar() {
     'tokensSectionTopBarTitle'
   )
 
-  tokensSectionTopBarTitle.innerText = 'Total PNL:'
+  tokensSectionTopBarTitle.innerText = 'Held in position:'
 
   // const tokensSectionTopBarTotalInUsd = document.getElementById(
   //   'tokensSectionTopBarTotalInUsd'
