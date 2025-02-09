@@ -9,7 +9,7 @@ import { getUserCounter, setUserCounter } from './store'
 function preloadHtmlCounterFont() {
   const font = new FontFace(
     'digital font',
-    'https://zakharday.github.io/deso-pro-site/digital_7_mono.ttf'
+    'url(https://zakharday.github.io/deso-pro-site/digital_7_mono.ttf)'
   )
 
   font
