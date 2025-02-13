@@ -192,10 +192,6 @@ function addUserProfileContextMenuItem(tokenData, network, contextMenu) {
 
 function updateWalletMyTokenRow(tokenData, quote, trade) {
   const tokenRow = document.querySelector(`#myTokenRow_${tokenData.publicKey}`)
-  const tokenFee = document.querySelector('#tokenFee')
-
-  const fee = trade['ExecutionFeeAmountInQuoteCurrency']
-  const received = trade['ExecutionReceiveAmount']
 
   // console.log(token.username, quote, trade, fee, percent)
 
@@ -224,14 +220,7 @@ function updateWalletMyTokenRow(tokenData, quote, trade) {
   )
 
   if (newTokenPrice > tokenPrice || newTotalValue > totalValue) {
-    const percent = fee / (received / 100)
-
-    const tokenFeeText =
-      percent == 0
-        ? 'no fee'
-        : `${CalcsAndFormatters.formatPrice(percent, 1)}% fee`
-
-    tokenFee.innerText = tokenFeeText
+    updateWalletTokenRowFee(tokenData, trade)
 
     tokenPriceInUsd.innerText = CalcsAndFormatters.formatPrice(newTokenPrice, 6)
     tokenPriceInQuoteCurrencyQuote.innerText = quote
@@ -252,7 +241,21 @@ function updateWalletMyTokenRow(tokenData, quote, trade) {
   }
 }
 
-function updateWalletTokenRowFee(tokenRow) {}
+function updateWalletTokenRowFee(tokenData, trade) {
+  const tokenRow = document.querySelector(`#myTokenRow_${tokenData.publicKey}`)
+  const tokenFee = tokenRow.querySelector('#tokenFee')
+
+  const fee = trade['ExecutionFeeAmountInQuoteCurrency']
+  const received = trade['ExecutionReceiveAmount']
+  const percent = fee / (received / 100)
+
+  const tokenFeeText =
+    percent == 0
+      ? 'no fee'
+      : `${CalcsAndFormatters.formatPrice(percent, 1)}% fee`
+
+  tokenFee.innerText = tokenFeeText
+}
 
 function updateWalletMyTokenRowPnl(tokenData, total) {
   const tokenRow = document.querySelector(`#myTokenRow_${tokenData.publicKey}`)

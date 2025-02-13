@@ -93,6 +93,7 @@ function getMyTokensDataAndUpdateTable() {
     OpenfundApiRequests.getIsHodlingPublicKey(holderKey, publicKey).then(
       (tokenHodlingData) => {
         tokenData.hodlingData = tokenHodlingData
+
         OpenfundWalletHtml.addUserProfileContextMenu(tokenRow, tokenData)
 
         OpenfundWalletController.getMyTokenDataAndUpdateTokenRow(

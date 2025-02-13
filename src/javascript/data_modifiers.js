@@ -168,14 +168,18 @@ function processTokenRecentTrades(trades, quote) {
       }
     }
 
-    // console.log(trade)
+    console.log(trade.tokenUsername)
   })
 
   if (quote == 'DESO') {
+    console.log(totalInDeso, exchangeRate['USDCentsPerDeSoExchangeRate'] / 100)
+
     totalInUsdInQuote =
       totalInDeso * (exchangeRate['USDCentsPerDeSoExchangeRate'] / 100)
   } else if (quote == 'FOCUS') {
     totalInUsdInQuote = totalInFocus * focusPrice['MidPrice']
+    // } else if (quote == 'USDC') {
+    //   totalInUsdInQuote = totalInUsd
   } else {
     totalInUsdInQuote = totalInUsd
   }
