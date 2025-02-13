@@ -1,59 +1,195 @@
-import {
-  getHtmlHolderPublicKey,
-  addHtmlWalletTokensSectionTopBar,
-  updateHtmlWalletTokenSectionTopBar
-} from './openfund_wallet_html'
+import { Constants } from './constants'
+import { Store } from './store'
+import { CalcsAndFormatters } from './calcs_and_formatters'
+import { DataModifiers } from './data_modifiers'
 
-import {
-  getApiGqlDaoCoinTransfer,
-  getApiGqlTradingRecentTrades
-} from './openfund_api_requests'
-
-import {
-  getHolderKey,
-  setHolderKey,
-  getTransferTransactions,
-  getTradingTransactions
-} from './store'
-
-import {
-  processDataTradeTransactions,
-  processDataDaoCoinTranferTransactions
-} from './data_modifiers'
+import { OpenfundApiRequests } from './openfund_api_requests'
+import { OpenfundWalletHtml } from './openfund_wallet_html'
+import { FocusAllPagesHtml } from './focus_all_pages_html'
 
 function getHolderKeyAndSetToStore() {
-  const holderKey = getHtmlHolderPublicKey()
-  setHolderKey(holderKey)
+  const holderKey = OpenfundWalletHtml.getHolderPublicKey()
+  Store.setHolderKey(holderKey)
 }
 
 function getFocusInvestedAndShowOnPage() {
-  const holderKey = getHolderKey()
+  const holderKey = Store.getHolderKey()
   const promises = []
 
-  addHtmlWalletTokensSectionTopBar()
+  OpenfundWalletHtml.addWalletTokensSectionTopBar()
 
-  const transferPromise = getApiGqlDaoCoinTransfer(holderKey).then(() => {
-    const transactions = getTransferTransactions()
-    const processPromise = processDataDaoCoinTranferTransactions(transactions)
+  const transferPromise = OpenfundApiRequests.getGqlDaoCoinTransfer(
+    holderKey
+  ).then(() => {
+    const transactions = Store.getTransferTransactions()
+
+    const processPromise =
+      DataModifiers.processDaoCoinTranferTransactions(transactions)
+
     promises.push(processPromise)
   })
 
-  const tradesPromise = getApiGqlTradingRecentTrades(holderKey).then(() => {
-    const transactions = getTradingTransactions()
-    const processPromise = processDataTradeTransactions(transactions)
+  const tradesPromise = OpenfundApiRequests.getGqlTradingRecentTrades(
+    holderKey
+  ).then(() => {
+    const transactions = Store.getTradingTransactions()
+    const processPromise = DataModifiers.processTradeTransactions(transactions)
     promises.push(processPromise)
   })
 
   promises.push(transferPromise, tradesPromise)
 
   Promise.all(promises).then(() => {
-    updateHtmlWalletTokenSectionTopBar()
+    OpenfundWalletHtml.updateWalletTokenSectionTopBar()
+  })
+}
+
+function prepareMyTokensTable(container) {
+  const myTokens = Store.getMyTokensData()
+
+  const myTokensTable = container
+    .querySelector('tbody')
+    .getElementsByTagName('tr')
+
+  for (let index = 0; index < myTokensTable.length; index++) {
+    const tokenRow = myTokensTable[index]
+    const tokenData = OpenfundWalletHtml.getTokenRowData(tokenRow)
+    myTokens.push(tokenData)
+
+    OpenfundWalletHtml.prepareMyTokenRow(tokenRow, tokenData)
+    OpenfundWalletHtml.prepareMyTokenRowTokenCell(tokenRow)
+    OpenfundWalletHtml.prepareMyTokerRowPriceCell(tokenRow)
+    OpenfundWalletHtml.prepareMyTokenRowValueCell(tokenRow)
+  }
+
+  Store.setMyTokensData(myTokens)
+}
+
+function getMyTokensDataAndUpdateTable() {
+  const holderKey = Store.getHolderKey()
+  const myTokens = Store.getMyTokensData()
+
+  myTokens.forEach((tokenData) => {
+    const tokenRow = OpenfundWalletHtml.getCurrentMyTokenRow(tokenData)
+    const { publicKey } = tokenData
+
+    OpenfundApiRequests.getIsHodlingPublicKey(holderKey, publicKey).then(
+      (tokenHodlingData) => {
+        tokenData.hodlingData = tokenHodlingData
+        OpenfundWalletHtml.addUserProfileContextMenu(tokenRow, tokenData)
+
+        OpenfundWalletController.getMyTokenDataAndUpdateTokenRow(
+          holderKey,
+          publicKey,
+          tokenData
+        ).then(() => {
+          getMyTokenPnlAndUpdateTokenRow(holderKey, publicKey, tokenData)
+        })
+      }
+    )
+  })
+}
+
+function getMyTokenDataAndUpdateTokenRow(holderKey, holdingKey, tokenData) {
+  const transactorKey = holderKey
+  const baseKey = holdingKey
+  const tokenName = tokenData.username
+
+  const tokenQuantity = CalcsAndFormatters.hexNanosToOrderQuantity(
+    tokenData.hodlingData['BalanceEntry']['BalanceNanosUint256']
+  )
+
+  const promises = []
+
+  // console.log(token.username, token)
+
+  if (tokenName != 'focus') {
+    promises.push(
+      OpenfundApiRequests.getMarketOrderData(
+        Constants.focusKey,
+        baseKey,
+        transactorKey,
+        tokenQuantity,
+        tokenName,
+        'FOCUS'
+      ).then((trade) => {
+        // console.log(
+        //   'TRADE',
+        //   'FOCUS',
+        //   trade,
+        //   token.username,
+        //   token.quantity
+        // )
+
+        // console.log(trade)
+        const focusInPositionStored = Store.getFocusInPosition()
+        const focusInPosition = trade['ExecutionReceiveAmount']
+
+        Store.setFocusInPosition(
+          focusInPositionStored + Number(focusInPosition)
+        )
+
+        promises.push(
+          OpenfundWalletHtml.updateWalletMyTokenRow(tokenData, 'FOCUS', trade)
+        )
+      })
+    )
+  }
+
+  promises.push(
+    OpenfundApiRequests.getMarketOrderData(
+      Constants.usdcKey,
+      baseKey,
+      transactorKey,
+      tokenQuantity,
+      tokenName,
+      'USDC'
+    ).then((trade) => {
+      // console.log('TRADE', 'USDC', trade, token.username, token.quantity)
+
+      promises.push(
+        OpenfundWalletHtml.updateWalletMyTokenRow(tokenData, 'USDC', trade)
+      )
+    })
+  )
+
+  promises.push(
+    OpenfundApiRequests.getMarketOrderData(
+      Constants.desoProxyKey,
+      baseKey,
+      transactorKey,
+      tokenQuantity,
+      tokenName,
+      'DESO'
+    ).then((trade) => {
+      // console.log('TRADE', 'DESO', trade, token.username, token.quantity)
+
+      promises.push(
+        OpenfundWalletHtml.updateWalletMyTokenRow(tokenData, 'DESO', trade)
+      )
+    })
+  )
+
+  return Promise.all(promises)
+}
+
+function getMyTokenPnlAndUpdateTokenRow(holderKey, holdingKey, tokenData) {
+  OpenfundApiRequests.getGqlTokenTradingRecentTrades(
+    holdingKey,
+    holderKey
+  ).then((trades) => {
+    const quote = OpenfundWalletHtml.getCurrencyQuoteFromTokenRow(tokenData)
+    const total = DataModifiers.processTokenRecentTrades(trades, quote)
+    OpenfundWalletHtml.updateWalletMyTokenRowPnl(tokenData, total)
   })
 }
 
 const OpenfundWalletController = {
   getHolderKeyAndSetToStore,
-  getFocusInvestedAndShowOnPage
+  getFocusInvestedAndShowOnPage,
+  prepareMyTokensTable,
+  getMyTokensDataAndUpdateTable,
+  getMyTokenDataAndUpdateTokenRow
 }
 
 export { OpenfundWalletController }

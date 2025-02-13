@@ -1,28 +1,12 @@
-import {
-  focusKey,
-  desoProxyKey,
-  usdcKey,
-  desoKey,
-  holdingsPanelId,
-  myTokensPanelId
-} from './constants'
+import { Constants } from './constants'
+import { Store } from './store'
+import { CalcsAndFormatters } from './calcs_and_formatters'
 
-import {
-  getFocusReceived,
-  setFocusReceived,
-  getFocusTransfered,
-  setFocusTransfered,
-  setFocusBought,
-  setFocusSold
-} from './store'
-
-import { hexNanosToNumber } from './calcs_and_formatters'
-
-function processDataDaoCoinTranferTransactions(transactions) {
+function processDaoCoinTranferTransactions(transactions) {
   return new Promise((resolve, reject) => {
     transactions.forEach((node) => {
       if (node.transaction.txIndexMetadata.CreatorUsername == 'focus') {
-        const currentTransfer = hexNanosToNumber(
+        const currentTransfer = CalcsAndFormatters.hexNanosToNumber(
           node.transaction.txIndexMetadata.DAOCoinToTransferNanos
         )
 
@@ -30,11 +14,11 @@ function processDataDaoCoinTranferTransactions(transactions) {
           node.metadata == 'ReceiverPublicKey' &&
           node.transaction.account.username != 'focus_classic'
         ) {
-          const storedFocusReceived = getFocusReceived()
-          setFocusReceived(storedFocusReceived + currentTransfer)
+          const storedFocusReceived = Store.getFocusReceived()
+          Store.setFocusReceived(storedFocusReceived + currentTransfer)
         } else if (node.metadata == 'TransactorPublicKeyBase58Check') {
-          const storedFocusTransfered = getFocusTransfered()
-          setFocusTransfered(storedFocusTransfered + currentTransfer)
+          const storedFocusTransfered = Store.getFocusTransfered()
+          Store.setFocusTransfered(storedFocusTransfered + currentTransfer)
         }
       }
     })
@@ -43,7 +27,7 @@ function processDataDaoCoinTranferTransactions(transactions) {
   })
 }
 
-function processDataTradeTransactions(transactions) {
+function processTradeTransactions(transactions) {
   return new Promise((resolve, reject) => {
     let totalInUsdc = 0
     let totalInDeso = 0
@@ -75,14 +59,14 @@ function processDataTradeTransactions(transactions) {
       let quote = ''
 
       switch (denominatedCoinPublicKey) {
-        case focusKey:
+        case Constants.focusKey:
           quote = 'FOCUS'
           break
-        case desoProxyKey:
-        case desoKey:
+        case Constants.desoProxyKey:
+        case Constants.desoKey:
           quote = 'DESO'
           break
-        case usdcKey:
+        case Constants.usdcKey:
           quote = 'USDC'
           break
       }
@@ -136,14 +120,14 @@ function processDataTradeTransactions(transactions) {
       }
     })
 
-    setFocusBought(focusBought)
-    setFocusSold(focusSold)
+    Store.setFocusBought(focusBought)
+    Store.setFocusSold(focusSold)
 
     resolve()
   })
 }
 
-function processDataTokenRecentTrades(trades, quote) {
+function processTokenRecentTrades(trades, quote) {
   let totalInUsd = 0
   let totalInFocus = 0
   let totalInDeso = 0
@@ -184,8 +168,10 @@ function processDataTokenRecentTrades(trades, quote) {
   return { totalInUsd, totalInFocus, totalInDeso }
 }
 
-export {
-  processDataDaoCoinTranferTransactions,
-  processDataTokenRecentTrades,
-  processDataTradeTransactions
+const DataModifiers = {
+  processDaoCoinTranferTransactions,
+  processTokenRecentTrades,
+  processTradeTransactions
 }
+
+export { DataModifiers }

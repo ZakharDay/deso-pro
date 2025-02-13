@@ -1,4 +1,5 @@
 let holderKey = ''
+let myTokens = []
 let focusReceived = 0
 let focusTransfered = 0
 let focusSold = 0
@@ -26,6 +27,14 @@ function getHolderKey() {
 
 function setHolderKey(key) {
   holderKey = key
+}
+
+function getMyTokensData() {
+  return myTokens
+}
+
+function setMyTokensData(tokensData) {
+  myTokens = tokensData
 }
 
 function getFocusReceived() {
@@ -92,10 +101,12 @@ function setUserCounter(counter) {
   userCounter = counter
 }
 
-export {
+const Store = {
   resetStore,
   getHolderKey,
   setHolderKey,
+  getMyTokensData,
+  setMyTokensData,
   getFocusReceived,
   setFocusReceived,
   getFocusTransfered,
@@ -113,3 +124,5 @@ export {
   getUserCounter,
   setUserCounter
 }
+
+export { Store }

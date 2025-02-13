@@ -1,12 +1,10 @@
-import { formatPrice } from './calcs_and_formatters'
-
-import { getApiGqlFocusUsersCount } from './openfund_api_requests'
+import { Store } from './store'
+import { CalcsAndFormatters } from './calcs_and_formatters'
+import { OpenfundApiRequests } from './openfund_api_requests'
 
 import { focusCounterPopupHtml } from './focus_counter_popup_html'
 
-import { getUserCounter, setUserCounter } from './store'
-
-function preloadHtmlCounterFont() {
+function preloadCounterFont() {
   const font = new FontFace(
     'digital font',
     'url(https://zakharday.github.io/deso-pro-site/digital_7_mono.ttf)'
@@ -22,28 +20,34 @@ function preloadHtmlCounterFont() {
     })
 }
 
-function addHtmlFocusUserCounter(container) {
-  const counter = getUserCounter()
+function addFocusUserCounter(container) {
+  const counter = Store.getUserCounter()
   let counterElement = document.getElementById('focusUsersCounter')
 
   if (counterElement) {
-    counterElement.innerText = `${formatPrice(counter, 0)} users`
+    counterElement.innerText = `${CalcsAndFormatters.formatPrice(
+      counter,
+      0
+    )} users`
   } else {
     counterElement = document.createElement('div')
     counterElement.id = 'focusUsersCounter'
     counterElement.style.marginTop = '8px'
     counterElement.classList.add('text-xs', 'text-muted')
-    counterElement.innerText = `${formatPrice(counter, 0)} users`
+    counterElement.innerText = `${CalcsAndFormatters.formatPrice(
+      counter,
+      0
+    )} users`
     container.appendChild(counterElement)
 
     counterElement.addEventListener('click', (e) => {
       e.preventDefault()
-      showHtmlFocusUserCounterPopup()
+      showFocusUserCounterPopup()
     })
   }
 }
 
-function showHtmlFocusUserCounterPopup() {
+function showFocusUserCounterPopup() {
   const popup = document.createElement('div')
   popup.id = 'userCounterPopup'
   popup.style.position = 'fixed'
@@ -59,13 +63,13 @@ function showHtmlFocusUserCounterPopup() {
   popup.innerHTML = focusCounterPopupHtml
 
   document.body.appendChild(popup)
-  updateHtmlFocusUserCouterPopup()
+  updateFocusUserCouterPopup()
 
   const updateCounter = setInterval(() => {
-    getApiGqlFocusUsersCount().then((counter) => {
-      setUserCounter(counter)
-      addHtmlFocusUserCounter()
-      updateHtmlFocusUserCouterPopup()
+    OpenfundApiRequests.getGqlFocusUsersCount().then((counter) => {
+      Store.setUserCounter(counter)
+      addFocusUserCounter()
+      updateFocusUserCouterPopup()
     })
   }, 5000)
 
@@ -75,8 +79,8 @@ function showHtmlFocusUserCounterPopup() {
   })
 }
 
-function updateHtmlFocusUserCouterPopup() {
-  const counter = getUserCounter()
+function updateFocusUserCouterPopup() {
+  const counter = Store.getUserCounter()
   const popup = document.getElementById('userCounterPopup')
   const numberWrappers = popup.getElementsByClassName('number_wrapper')
 
@@ -191,8 +195,10 @@ function updateHtmlFocusUserCouterPopup() {
   }
 }
 
-export {
-  addHtmlFocusUserCounter,
-  showHtmlFocusUserCounterPopup,
-  preloadHtmlCounterFont
+const FocusAllPagesHtml = {
+  addFocusUserCounter,
+  showFocusUserCounterPopup,
+  preloadCounterFont
 }
+
+export { FocusAllPagesHtml }

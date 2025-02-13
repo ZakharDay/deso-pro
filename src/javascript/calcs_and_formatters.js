@@ -11,4 +11,14 @@ function hexNanosToNumber(hex) {
   return Number(hex) / 1000000000000000000
 }
 
-export { formatPrice, hexNanosToNumber }
+function hexNanosToOrderQuantity(hex) {
+  return Number(hex) / 1000000000000000000 - 0.0001
+}
+
+const CalcsAndFormatters = {
+  formatPrice,
+  hexNanosToNumber,
+  hexNanosToOrderQuantity
+}
+
+export { CalcsAndFormatters }

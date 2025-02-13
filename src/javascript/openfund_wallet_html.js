@@ -1,124 +1,201 @@
-import { formatPrice, hexNanosToNumber } from './calcs_and_formatters'
+import '../extension.scss'
 
-import {
-  getFocusBought,
-  getFocusReceived,
-  getFocusSold,
-  getFocusTransfered,
-  getFocusInPosition
-} from './store'
+import { Store } from './store'
+import { Constants } from './constants'
+import { CalcsAndFormatters } from './calcs_and_formatters'
 
-function getHtmlHolderPublicKey() {
+function injectCss() {
+  const detector = document.querySelector('style#desopro')
+
+  if (!detector) {
+    const css = require(/* webpackMode: "eager" */ '../../dist/extension.css?raw')
+    const style = document.createElement('style')
+    style.id = 'desopro'
+
+    if (style.styleSheet) {
+      style.styleSheet.cssText = css
+    } else {
+      style.appendChild(document.createTextNode(css))
+    }
+
+    document.querySelector('head').appendChild(style)
+  }
+}
+
+function getHolderPublicKey() {
   return document.querySelector('button.rounded-md').title
 }
 
-function markHtmlWalletMyTokens(container) {
-  return new Promise((resolve) => {
-    const elements = []
+function getTokenRowData(tokenRow) {
+  const profilePic = tokenRow.querySelector('td a img')
+  const publicKey = /picture\/(.*?)\?/g.exec(profilePic.src)[1]
 
-    const myTokensTable = container
-      .querySelector('tbody')
-      .getElementsByTagName('tr')
+  const username = tokenRow
+    .querySelector('td:first-child .text-muted-foreground')
+    .innerText.substring(1)
 
-    for (let index = 0; index < myTokensTable.length; index++) {
-      const tokenRow = myTokensTable[index]
-      const profilePic = tokenRow.querySelector('td a img')
-      const publicKey = /picture\/(.*?)\?/g.exec(profilePic.src)[1]
-      tokenRow.dataset.publicKey = publicKey
+  return { publicKey, username }
+}
 
-      const tokenNameCell = tokenRow.querySelector('td:nth-child(1) a')
-      tokenNameCell.id = 'tokenNameCell'
+function getCurrentMyTokenRow(tokenData) {
+  return document.getElementById(`myTokenRow_${tokenData.publicKey}`)
+}
 
-      const tokenFee = document.createElement('span')
-      tokenFee.id = 'tokenFee'
-      tokenFee.classList.add('text-muted')
-      tokenFee.style.marginLeft = '10px'
+function prepareMyTokenRow(tokenRow, tokenData) {
+  tokenRow.id = `myTokenRow_${tokenData.publicKey}`
+}
 
-      tokenNameCell.appendChild(tokenFee)
+function prepareMyTokenRowTokenCell(tokenRow) {
+  const userProfileContextMenu = document.createElement('div')
+  userProfileContextMenu.classList.add('linksList')
+  userProfileContextMenu.id = 'userProfileContextMenu'
 
-      const priceCell = tokenRow.querySelector('td:nth-child(3)')
-      priceCell.id = 'priceCell'
+  const tokenNameCell = document.createElement('div')
+  tokenNameCell.id = 'tokenNameCell'
 
-      const tokenPriceInUsd = priceCell.querySelector(
-        'div.ml-auto > div:first-child > *:first-child'
-      )
+  tokenNameCell.innerHTML = tokenRow.querySelector('td:first-child a').innerHTML
 
-      tokenPriceInUsd.id = 'tokenPriceInUsd'
-      tokenPriceInUsd.innerText = '0'
+  tokenRow.querySelector('td:first-child a').replaceWith(tokenNameCell)
 
-      const tokenPriceInQuoteCurrency = priceCell.querySelector(
-        'div.ml-auto > div:last-child'
-      )
+  const tokenNameElement = tokenNameCell.querySelector('.text-muted-foreground')
 
-      tokenPriceInQuoteCurrency.id = 'tokenPriceInQuoteCurrency'
-      tokenPriceInQuoteCurrency.innerHTML = ''
-      tokenPriceInQuoteCurrency.style.justifyContent = 'flex-end'
-      tokenPriceInQuoteCurrency.style.alignItems = 'baseline'
-      tokenPriceInQuoteCurrency.style.gap = '4px'
+  tokenNameElement.id = 'tokenNameElement'
+  tokenNameElement.appendChild(userProfileContextMenu)
 
-      const tokenPriceInQuoteCurrencyAmount = document.createElement('span')
-      tokenPriceInQuoteCurrencyAmount.id = 'tokenPriceInQuoteCurrencyAmount'
-      tokenPriceInQuoteCurrencyAmount.innerText = '0'
-      tokenPriceInQuoteCurrencyAmount.classList.add('text-sm', 'text-muted')
+  const tokenFee = document.createElement('span')
+  tokenFee.id = 'tokenFee'
+  tokenFee.classList.add('text-muted')
+  tokenFee.style.marginLeft = '10px'
 
-      const tokenPriceInQuoteCurrencyQuote = document.createElement('span')
-      tokenPriceInQuoteCurrencyQuote.id = 'tokenPriceInQuoteCurrencyQuote'
-      tokenPriceInQuoteCurrencyQuote.innerText = ''
-      tokenPriceInQuoteCurrencyQuote.classList.add('text-xs', 'text-muted')
+  tokenNameCell.appendChild(tokenFee)
+}
 
-      tokenPriceInQuoteCurrency.appendChild(tokenPriceInQuoteCurrencyAmount)
-      tokenPriceInQuoteCurrency.appendChild(tokenPriceInQuoteCurrencyQuote)
+function prepareMyTokerRowPriceCell(tokenRow) {
+  const priceCell = tokenRow.querySelector('td:nth-child(3)')
+  priceCell.id = 'priceCell'
 
-      const valueCell = tokenRow.querySelector('td:nth-child(6)')
-      valueCell.id = 'valueCell'
+  const tokenPriceInUsd = priceCell.querySelector(
+    'div.ml-auto > div:first-child > *:first-child'
+  )
 
-      const totalValueInUsdCell = valueCell.querySelector(
-        'div.ml-auto > div:first-child'
-      )
+  tokenPriceInUsd.id = 'tokenPriceInUsd'
+  tokenPriceInUsd.innerText = '0'
 
-      totalValueInUsdCell.id = 'totalValueInUsdCell'
+  const tokenPriceInQuoteCurrency = priceCell.querySelector(
+    'div.ml-auto > div:last-child'
+  )
 
-      const totalValueInUsd = valueCell.querySelector(
-        'div.ml-auto > div:first-child > *:first-child'
-      )
+  tokenPriceInQuoteCurrency.id = 'tokenPriceInQuoteCurrency'
+  tokenPriceInQuoteCurrency.innerHTML = ''
+  tokenPriceInQuoteCurrency.style.justifyContent = 'flex-end'
+  tokenPriceInQuoteCurrency.style.alignItems = 'baseline'
+  tokenPriceInQuoteCurrency.style.gap = '4px'
 
-      totalValueInUsd.id = 'totalValueInUsd'
-      totalValueInUsd.innerText = '0'
+  const tokenPriceInQuoteCurrencyAmount = document.createElement('span')
+  tokenPriceInQuoteCurrencyAmount.id = 'tokenPriceInQuoteCurrencyAmount'
+  tokenPriceInQuoteCurrencyAmount.innerText = '0'
+  tokenPriceInQuoteCurrencyAmount.classList.add('text-sm', 'text-muted')
 
-      const totalValueInQuoteCurrecy = valueCell.querySelector(
-        'div.ml-auto > div:last-child'
-      )
+  const tokenPriceInQuoteCurrencyQuote = document.createElement('span')
+  tokenPriceInQuoteCurrencyQuote.id = 'tokenPriceInQuoteCurrencyQuote'
+  tokenPriceInQuoteCurrencyQuote.innerText = ''
+  tokenPriceInQuoteCurrencyQuote.classList.add('text-xs', 'text-muted')
 
-      totalValueInQuoteCurrecy.id = 'totalValueInQuoteCurrecy'
-      totalValueInQuoteCurrecy.innerHTML = ''
-      totalValueInQuoteCurrecy.style.justifyContent = 'flex-end'
-      totalValueInQuoteCurrecy.style.alignItems = 'baseline'
-      totalValueInQuoteCurrecy.style.gap = '4px'
+  tokenPriceInQuoteCurrency.appendChild(tokenPriceInQuoteCurrencyAmount)
+  tokenPriceInQuoteCurrency.appendChild(tokenPriceInQuoteCurrencyQuote)
+}
 
-      const totalValueInQuoteCurrecyAmount = document.createElement('span')
-      totalValueInQuoteCurrecyAmount.id = 'totalValueInQuoteCurrecyAmount'
-      totalValueInQuoteCurrecyAmount.innerText = '0'
-      totalValueInQuoteCurrecyAmount.classList.add('text-sm', 'text-muted')
+function prepareMyTokenRowValueCell(tokenRow) {
+  const valueCell = tokenRow.querySelector('td:nth-child(6)')
+  valueCell.id = 'valueCell'
 
-      const totalValueInQuoteCurrecyQuote = document.createElement('span')
-      totalValueInQuoteCurrecyQuote.id = 'totalValueInQuoteCurrecyQuote'
-      totalValueInQuoteCurrecyQuote.innerText = ''
-      totalValueInQuoteCurrecyQuote.classList.add('text-xs', 'text-muted')
+  const totalValueInUsdCell = valueCell.querySelector(
+    'div.ml-auto > div:first-child'
+  )
 
-      totalValueInQuoteCurrecy.appendChild(totalValueInQuoteCurrecyAmount)
-      totalValueInQuoteCurrecy.appendChild(totalValueInQuoteCurrecyQuote)
+  totalValueInUsdCell.id = 'totalValueInUsdCell'
 
-      elements.push(tokenRow)
-    }
+  const totalValueInUsd = valueCell.querySelector(
+    'div.ml-auto > div:first-child > *:first-child'
+  )
 
-    resolve(elements)
+  totalValueInUsd.id = 'totalValueInUsd'
+  totalValueInUsd.innerText = '0'
+
+  const totalValueInQuoteCurrecy = valueCell.querySelector(
+    'div.ml-auto > div:last-child'
+  )
+
+  totalValueInQuoteCurrecy.id = 'totalValueInQuoteCurrecy'
+  totalValueInQuoteCurrecy.innerHTML = ''
+  totalValueInQuoteCurrecy.style.justifyContent = 'flex-end'
+  totalValueInQuoteCurrecy.style.alignItems = 'baseline'
+  totalValueInQuoteCurrecy.style.gap = '4px'
+
+  const totalValueInQuoteCurrecyAmount = document.createElement('span')
+  totalValueInQuoteCurrecyAmount.id = 'totalValueInQuoteCurrecyAmount'
+  totalValueInQuoteCurrecyAmount.innerText = '0'
+  totalValueInQuoteCurrecyAmount.classList.add('text-sm', 'text-muted')
+
+  const totalValueInQuoteCurrecyQuote = document.createElement('span')
+  totalValueInQuoteCurrecyQuote.id = 'totalValueInQuoteCurrecyQuote'
+  totalValueInQuoteCurrecyQuote.innerText = ''
+  totalValueInQuoteCurrecyQuote.classList.add('text-xs', 'text-muted')
+
+  totalValueInQuoteCurrecy.appendChild(totalValueInQuoteCurrecyAmount)
+  totalValueInQuoteCurrecy.appendChild(totalValueInQuoteCurrecyQuote)
+}
+
+function addUserProfileContextMenu(tokenRow, tokenData) {
+  const networks = [
+    'focus',
+    'openfund',
+    'deso',
+    'diamond',
+    'desocialworld',
+    'bitclout',
+    'nftz'
+  ]
+
+  const userProfileContextMenu = tokenRow.querySelector(
+    '#userProfileContextMenu'
+  )
+
+  networks.forEach((network) => {
+    addUserProfileContextMenuItem(tokenData, network, userProfileContextMenu)
   })
 }
 
-function updateHtmlWalletMyTokenRow(tokenRow, token, quote, trade) {
+function addUserProfileContextMenuItem(tokenData, network, contextMenu) {
+  const profileUrl = [
+    Constants.networkUrls[network].url,
+    tokenData.username
+  ].join('')
+
+  const profileLinkText = [Constants.networkUrls[network].text, 'Profile'].join(
+    ' '
+  )
+
+  const profileLink = document.createElement('a')
+
+  profileLink.href = profileUrl
+  profileLink.target = '_blank'
+  profileLink.innerText = profileLinkText
+  profileLink.classList.add('linkItem')
+
+  contextMenu.appendChild(profileLink)
+}
+
+//
+// Refactoring
+//
+
+function updateWalletMyTokenRow(tokenData, quote, trade) {
+  const tokenRow = document.querySelector(`#myTokenRow_${tokenData.publicKey}`)
+  const tokenFee = document.querySelector('#tokenFee')
+
   const fee = trade['ExecutionFeeAmountInQuoteCurrency']
   const received = trade['ExecutionReceiveAmount']
-  const tokenFee = tokenRow.querySelector('#tokenFee')
 
   // console.log(token.username, quote, trade, fee, percent)
 
@@ -150,33 +227,38 @@ function updateHtmlWalletMyTokenRow(tokenRow, token, quote, trade) {
     const percent = fee / (received / 100)
 
     const tokenFeeText =
-      percent == 0 ? 'no fee' : `${formatPrice(percent, 1)}% fee`
+      percent == 0
+        ? 'no fee'
+        : `${CalcsAndFormatters.formatPrice(percent, 1)}% fee`
 
     tokenFee.innerText = tokenFeeText
 
-    tokenPriceInUsd.innerText = formatPrice(newTokenPrice, 6)
+    tokenPriceInUsd.innerText = CalcsAndFormatters.formatPrice(newTokenPrice, 6)
     tokenPriceInQuoteCurrencyQuote.innerText = quote
     tokenPriceInQuoteCurrencyQuote.dataset.quote = quote
 
-    tokenPriceInQuoteCurrencyAmount.innerText = formatPrice(
+    tokenPriceInQuoteCurrencyAmount.innerText = CalcsAndFormatters.formatPrice(
       trade['ExecutionPriceInQuoteCurrency'],
       2
     )
 
-    totalValueInUsd.innerText = formatPrice(newTotalValue, 2)
+    totalValueInUsd.innerText = CalcsAndFormatters.formatPrice(newTotalValue, 2)
     totalValueInQuoteCurrecyQuote.innerText = quote
 
-    totalValueInQuoteCurrecyAmount.innerText = formatPrice(
+    totalValueInQuoteCurrecyAmount.innerText = CalcsAndFormatters.formatPrice(
       trade['ExecutionReceiveAmount'],
       2
     )
   }
 }
 
-function updateHtmlWalletMyTokenRowPnl(tokenRow, total) {
+function updateWalletTokenRowFee(tokenRow) {}
+
+function updateWalletMyTokenRowPnl(tokenData, total) {
+  const tokenRow = document.querySelector(`#myTokenRow_${tokenData.publicKey}`)
   const totalValueInUsdCell = tokenRow.querySelector('#totalValueInUsdCell')
   const totalValueInUsd = tokenRow.querySelector('#totalValueInUsd')
-  const totalInUsdFormated = formatPrice(total.totalInUsd, 2)
+  const totalInUsdFormated = CalcsAndFormatters.formatPrice(total.totalInUsd, 2)
   totalValueInUsd.innerText = `${totalValueInUsd.innerText} (${totalInUsdFormated})`
 
   if (total.totalInUsd < 0) {
@@ -187,7 +269,17 @@ function updateHtmlWalletMyTokenRowPnl(tokenRow, total) {
   // console.log(total)
 }
 
-function addHtmlWalletTokensSectionTopBar() {
+function getCurrencyQuoteFromTokenRow(tokenData) {
+  const tokenRow = document.querySelector(`#myTokenRow_${tokenData.publicKey}`)
+
+  const tokenPriceInQuoteCurrencyQuote = tokenRow.querySelector(
+    '#tokenPriceInQuoteCurrencyQuote'
+  )
+
+  return tokenPriceInQuoteCurrencyQuote.dataset.quote
+}
+
+function addWalletTokensSectionTopBar() {
   const tokensSectionTopBarContainer = document.querySelector(
     '#app-root > div > div:nth-child(2) > div > div:nth-child(3) > div:nth-child(2) > div > div:nth-child(2)'
   )
@@ -247,21 +339,23 @@ function addHtmlWalletTokensSectionTopBar() {
   tokensSectionTopBarContainer.appendChild(tokensSectionTopBar)
 }
 
-function updateHtmlWalletTokenSectionTopBar() {
-  const focusBought = getFocusBought()
-  const focusSold = getFocusSold()
-  const focusReceived = getFocusReceived()
-  const focusTransfered = getFocusTransfered()
-  const focusInPosition = getFocusInPosition()
+function updateWalletTokenSectionTopBar() {
+  const focusBought = Store.getFocusBought()
+  const focusSold = Store.getFocusSold()
+  const focusReceived = Store.getFocusReceived()
+  const focusTransfered = Store.getFocusTransfered()
+  const focusInPosition = Store.getFocusInPosition()
 
   const focusInitial = focusReceived + focusBought
   const focusHeld = focusBought + focusReceived - focusSold - focusTransfered
   const focusInvested = focusHeld - focusInitial
   const focusUnreleasedPnl = focusInvested + focusInPosition
 
-  const focusInvestedFormatted = formatPrice(focusInvested)
-  const focusInPositionFormatted = formatPrice(focusInPosition)
-  const focusUnreleasedPnlFormatted = formatPrice(focusUnreleasedPnl)
+  const focusInvestedFormatted = CalcsAndFormatters.formatPrice(focusInvested)
+  const focusInPositionFormatted =
+    CalcsAndFormatters.formatPrice(focusInPosition)
+  const focusUnreleasedPnlFormatted =
+    CalcsAndFormatters.formatPrice(focusUnreleasedPnl)
 
   // prettier-ignore
   const tokensSectionTopBarNotice = document.getElementById('tokensSectionTopBarNotice')
@@ -301,11 +395,23 @@ function colorizeRedOrGreen(element, statement) {
   }
 }
 
-export {
-  getHtmlHolderPublicKey,
-  markHtmlWalletMyTokens,
-  updateHtmlWalletMyTokenRow,
-  updateHtmlWalletMyTokenRowPnl,
-  addHtmlWalletTokensSectionTopBar,
-  updateHtmlWalletTokenSectionTopBar
+const OpenfundWalletHtml = {
+  injectCss,
+  getHolderPublicKey,
+  getTokenRowData,
+  getCurrentMyTokenRow,
+  prepareMyTokenRow,
+  prepareMyTokenRowTokenCell,
+  prepareMyTokerRowPriceCell,
+  prepareMyTokenRowValueCell,
+  addUserProfileContextMenu,
+  getCurrencyQuoteFromTokenRow,
+  //
+  //
+  updateWalletMyTokenRow,
+  updateWalletMyTokenRowPnl,
+  addWalletTokensSectionTopBar,
+  updateWalletTokenSectionTopBar
 }
+
+export { OpenfundWalletHtml }

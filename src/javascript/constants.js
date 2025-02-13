@@ -8,11 +8,49 @@ const holdingsPanelId = 'headlessui-tabs-panel-:rp:'
 const myTokensPanelSelector =
   '#app-root > div > div:last-child > div > div:last-child > div:last-child > div > div:last-child > div > div > div > table'
 
-export {
+const focusLogoSelector =
+  'main > div > div:last-child > div:first-child > div > div > div:first-child > a'
+
+const networkUrls = {
+  focus: {
+    text: 'Focus',
+    url: 'https://focus.xyz/'
+  },
+  openfund: {
+    text: 'Openfund',
+    url: 'https://openfund.com/d/'
+  },
+  deso: {
+    text: 'DeSo',
+    url: 'https://explorer.deso.com/u/'
+  },
+  diamond: {
+    text: 'Diamond',
+    url: 'https://diamondapp.com/u/'
+  },
+  desocialworld: {
+    text: 'DeSocialWorld',
+    url: 'https://desocialworld.com/u/'
+  },
+  bitclout: {
+    text: 'BitClout',
+    url: 'https://bitclout.com/u/'
+  },
+  nftz: {
+    text: 'NFTz',
+    url: 'https://nftz.me/u/'
+  }
+}
+
+const Constants = {
   focusKey,
   desoProxyKey,
   usdcKey,
   desoKey,
   holdingsPanelId,
-  myTokensPanelSelector
+  myTokensPanelSelector,
+  focusLogoSelector,
+  networkUrls
 }
+
+export { Constants }

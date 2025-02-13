@@ -12,8 +12,8 @@ module.exports = {
   },
   output: {
     filename: '[name].js',
-    path: path.resolve(__dirname, 'dist'),
-    clean: true
+    path: path.resolve(__dirname, 'dist')
+    // clean: true
   },
   module: {
     rules: [
@@ -30,7 +30,7 @@ module.exports = {
       },
       {
         test: /\.scss$/i,
-        use: ['css-loader', 'sass-loader']
+        use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader']
       },
       {
         test: /\.html$/i,
@@ -43,6 +43,10 @@ module.exports = {
     ]
   },
   plugins: [
+    new MiniCssExtractPlugin({
+      filename: '[name].css',
+      chunkFilename: '[id].css'
+    }),
     new CopyPlugin({
       patterns: [
         { from: 'src/images', to: 'images' },
@@ -50,5 +54,8 @@ module.exports = {
         { from: 'manifest.json', to: 'manifest.json' }
       ]
     })
-  ]
+  ],
+  optimization: {
+    minimizer: [new CssMinimizerPlugin()]
+  }
 }

@@ -6,4 +6,10 @@ const createDaoCoinLimitOrderWithFeeUrl =
 
 const focusGqlUrl = 'https://dev-graphql.focus.xyz/graphql'
 
-export { isHodlingPublicKeyUrl, createDaoCoinLimitOrderWithFeeUrl, focusGqlUrl }
+const OpenfundApiUrls = {
+  isHodlingPublicKeyUrl,
+  createDaoCoinLimitOrderWithFeeUrl,
+  focusGqlUrl
+}
+
+export { OpenfundApiUrls }

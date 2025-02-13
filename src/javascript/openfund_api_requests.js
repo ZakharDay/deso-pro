@@ -1,19 +1,9 @@
-import {
-  isHodlingPublicKeyUrl,
-  createDaoCoinLimitOrderWithFeeUrl,
-  focusGqlUrl
-} from './openfund_api_urls'
+import { Store } from './store'
+import { OpenfundApiUrls } from './openfund_api_urls'
 
-import {
-  getTransferTransactions,
-  setTransferTransactions,
-  getTradingTransactions,
-  setTradingTransactions
-} from './store'
-
-function getApiIsHodlingPublicKey(holderKey, holdingKey) {
+function getIsHodlingPublicKey(holderKey, holdingKey) {
   return new Promise((resolve, reject) => {
-    fetch(isHodlingPublicKeyUrl, {
+    fetch(OpenfundApiUrls.isHodlingPublicKeyUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -26,51 +16,7 @@ function getApiIsHodlingPublicKey(holderKey, holdingKey) {
     })
       .then((response) => {
         response.json().then((data) => {
-          // console.log(
-          //   'Success:',
-          //   data,
-          //   data['BalanceEntry']['ProfileEntryResponse']['Username'],
-          //   data['BalanceEntry']['BalanceNanos'],
-          //   data['BalanceEntry']['BalanceNanos'] / 1000000000,
-          //   data['BalanceEntry']['BalanceNanosUint256'],
-          //   Number(data['BalanceEntry']['BalanceNanosUint256']),
-          //   'QUANTITY',
-          //   Number(data['BalanceEntry']['BalanceNanosUint256']) /
-          //     1000000000000000000,
-          //   // data['BalanceEntry']['ProfileEntryResponse']['CoinEntry'],
-          //   // data['BalanceEntry']['ProfileEntryResponse']['DAOCoinEntry'],
-          //   Number(
-          //     data['BalanceEntry']['ProfileEntryResponse']['DAOCoinEntry'][
-          //       'CoinsInCirculationNanos'
-          //     ]
-          //   ),
-          //   data['BalanceEntry']['ProfileEntryResponse']['DAOCoinEntry'][
-          //     'NumberOfHolders'
-          //   ],
-          //   data['BalanceEntry']['ProfileEntryResponse']['CoinPriceDeSoNanos'],
-          //   data['BalanceEntry']['ProfileEntryResponse'][
-          //     'CoinPriceBitCloutNanos'
-          //   ],
-          //   data['BalanceEntry']['ProfileEntryResponse']['DESOBalanceNanos'],
-          //   data['BalanceEntry']['ProfileEntryResponse'][
-          //     'BestExchangeRateDESOPerDAOCoin'
-          //   ],
-          //   data['BalanceEntry']['HodlerDESOBalanceNanos']
-          // )
-
-          const username =
-            data['BalanceEntry']['ProfileEntryResponse']['Username']
-
-          const quantity =
-            Number(data['BalanceEntry']['BalanceNanosUint256']) /
-              1000000000000000000 -
-            0.0001
-          // 0.00000000001
-          // 0.0000000000001
-
-          // console.log(username, quantity, data)
-
-          resolve({ username, quantity })
+          resolve(data)
         })
       })
       .catch((error) => {
@@ -80,7 +26,7 @@ function getApiIsHodlingPublicKey(holderKey, holdingKey) {
   })
 }
 
-function getApiMarketOrderData(
+function getMarketOrderData(
   quoteKey,
   baseKey,
   transactorKey,
@@ -91,7 +37,7 @@ function getApiMarketOrderData(
   return new Promise((resolve, reject) => {
     // console.log('getApiMarketOrderData', username)
 
-    fetch(createDaoCoinLimitOrderWithFeeUrl, {
+    fetch(OpenfundApiUrls.createDaoCoinLimitOrderWithFeeUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -125,9 +71,9 @@ function getApiMarketOrderData(
 }
 
 // For Token
-function getApiGqlTokenTradingRecentTrades(tokenPublicKey, traderPublicKey) {
+function getGqlTokenTradingRecentTrades(tokenPublicKey, traderPublicKey) {
   return new Promise((resolve, reject) => {
-    fetch(focusGqlUrl, {
+    fetch(OpenfundApiUrls.focusGqlUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -170,9 +116,9 @@ function getApiGqlTokenTradingRecentTrades(tokenPublicKey, traderPublicKey) {
 //
 //
 
-function getApiGqlTradingRecentTrades(publicKey, offset = 0) {
+function getGqlTradingRecentTrades(publicKey, offset = 0) {
   return new Promise((resolve, reject) => {
-    fetch(focusGqlUrl, {
+    fetch(OpenfundApiUrls.focusGqlUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -197,12 +143,12 @@ function getApiGqlTradingRecentTrades(publicKey, offset = 0) {
         response.json().then((data) => {
           // console.log('Success:', data)
 
-          const storedTradingTransactions = getTradingTransactions()
+          const storedTradingTransactions = Store.getTradingTransactions()
           storedTradingTransactions.push(...data.data.tradingRecentTrades.nodes)
-          setTradingTransactions(storedTradingTransactions)
+          Store.setTradingTransactions(storedTradingTransactions)
 
           if (data.data.tradingRecentTrades.pageInfo.hasNextPage) {
-            getApiGqlTradingRecentTrades(publicKey, offset + 100).then(() => {
+            getGqlTradingRecentTrades(publicKey, offset + 100).then(() => {
               resolve()
             })
           } else {
@@ -217,9 +163,9 @@ function getApiGqlTradingRecentTrades(publicKey, offset = 0) {
   })
 }
 
-function getApiGqlDaoCoinTransfer(publicKey, offset = 0) {
+function getGqlDaoCoinTransfer(publicKey, offset = 0) {
   return new Promise((resolve, reject) => {
-    fetch(focusGqlUrl, {
+    fetch(OpenfundApiUrls.focusGqlUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -256,12 +202,12 @@ function getApiGqlDaoCoinTransfer(publicKey, offset = 0) {
         response.json().then((data) => {
           // console.log('Success:', data)
 
-          const storedTransferTransactions = getTransferTransactions()
+          const storedTransferTransactions = Store.getTransferTransactions()
           storedTransferTransactions.push(...data.data.affectedPublicKeys.nodes)
-          setTransferTransactions(storedTransferTransactions)
+          Store.setTransferTransactions(storedTransferTransactions)
 
           if (data.data.affectedPublicKeys.pageInfo.hasNextPage) {
-            getApiGqlDaoCoinTransfer(publicKey, offset + 100).then(() => {
+            getGqlDaoCoinTransfer(publicKey, offset + 100).then(() => {
               resolve()
             })
           } else {
@@ -276,9 +222,9 @@ function getApiGqlDaoCoinTransfer(publicKey, offset = 0) {
   })
 }
 
-function getApiGqlFocusUsersCount() {
+function getGqlFocusUsersCount() {
   return new Promise((resolve, reject) => {
-    fetch(focusGqlUrl, {
+    fetch(OpenfundApiUrls.focusGqlUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -308,11 +254,13 @@ function getApiGqlFocusUsersCount() {
   })
 }
 
-export {
-  getApiIsHodlingPublicKey,
-  getApiMarketOrderData,
-  getApiGqlTradingRecentTrades,
-  getApiGqlTokenTradingRecentTrades,
-  getApiGqlDaoCoinTransfer,
-  getApiGqlFocusUsersCount
+const OpenfundApiRequests = {
+  getIsHodlingPublicKey,
+  getMarketOrderData,
+  getGqlTradingRecentTrades,
+  getGqlTokenTradingRecentTrades,
+  getGqlDaoCoinTransfer,
+  getGqlFocusUsersCount
 }
+
+export { OpenfundApiRequests }
