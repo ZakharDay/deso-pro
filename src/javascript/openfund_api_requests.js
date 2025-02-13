@@ -1,4 +1,5 @@
 import { Store } from './store'
+import { Constants } from './constants'
 import { OpenfundApiUrls } from './openfund_api_urls'
 
 function getIsHodlingPublicKey(holderKey, holdingKey) {
@@ -16,6 +17,46 @@ function getIsHodlingPublicKey(holderKey, holdingKey) {
     })
       .then((response) => {
         response.json().then((data) => {
+          resolve(data)
+        })
+      })
+      .catch((error) => {
+        console.error('Error:', error)
+        reject()
+      })
+  })
+}
+
+function getExchangeRate() {
+  return new Promise((resolve, reject) => {
+    fetch(OpenfundApiUrls.getExchangeRate)
+      .then((response) => {
+        response.json().then((data) => {
+          // console.log('Success:', data)
+          resolve(data)
+        })
+      })
+      .catch((error) => {
+        console.error('Error:', error)
+        reject()
+      })
+  })
+}
+
+function getFocusPriceInUsd() {
+  return new Promise((resolve, reject) => {
+    fetch(OpenfundApiUrls.getQuoteCurrencyPriceInUsd, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        QuoteCurrencyPublicKeyBase58Check: Constants.focusKey
+      })
+    })
+      .then((response) => {
+        response.json().then((data) => {
+          // console.log('Success:', data)
           resolve(data)
         })
       })
@@ -256,6 +297,8 @@ function getGqlFocusUsersCount() {
 
 const OpenfundApiRequests = {
   getIsHodlingPublicKey,
+  getExchangeRate,
+  getFocusPriceInUsd,
   getMarketOrderData,
   getGqlTradingRecentTrades,
   getGqlTokenTradingRecentTrades,

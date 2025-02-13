@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "DeSo Pro",
   "description": "Use Openfund, Focus and DeSo like a pro",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "content_scripts": [
     {
       "matches": ["https://openfund.com/*", "https://focus.xyz/*"],

@@ -80,9 +80,15 @@ function initOpenfundWalletPage(container) {
   Store.resetStore()
   OpenfundWalletHtml.injectCss()
   OpenfundWalletController.getHolderKeyAndSetToStore()
-  OpenfundWalletController.getFocusInvestedAndShowOnPage()
   OpenfundWalletController.prepareMyTokensTable(container)
-  OpenfundWalletController.getMyTokensDataAndUpdateTable()
+
+  Promise.all([
+    OpenfundWalletController.getExchangeRateAndSetToStore(),
+    OpenfundWalletController.getFocusExchangeRateAndSetToStore()
+  ]).then(() => {
+    OpenfundWalletController.getFocusInvestedAndShowOnPage()
+    OpenfundWalletController.getMyTokensDataAndUpdateTable()
+  })
 }
 
 function initFocusAllPage(container) {

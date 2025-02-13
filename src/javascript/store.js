@@ -1,4 +1,6 @@
 let holderKey = ''
+let exchangeRate = {}
+let focusPrice = {}
 let myTokens = []
 let focusReceived = 0
 let focusTransfered = 0
@@ -11,6 +13,9 @@ let userCounter = 0
 
 function resetStore() {
   holderKey = ''
+  exchangeRate = {}
+  focusPrice = {}
+  myTokens = []
   focusReceived = 0
   focusTransfered = 0
   focusSold = 0
@@ -27,6 +32,22 @@ function getHolderKey() {
 
 function setHolderKey(key) {
   holderKey = key
+}
+
+function getExchangeRate() {
+  return exchangeRate
+}
+
+function setExchangeRate(data) {
+  exchangeRate = data
+}
+
+function getFocusPrice() {
+  return focusPrice
+}
+
+function setFocusPrice(price) {
+  focusPrice = price
 }
 
 function getMyTokensData() {
@@ -105,6 +126,10 @@ const Store = {
   resetStore,
   getHolderKey,
   setHolderKey,
+  getExchangeRate,
+  setExchangeRate,
+  getFocusPrice,
+  setFocusPrice,
   getMyTokensData,
   setMyTokensData,
   getFocusReceived,

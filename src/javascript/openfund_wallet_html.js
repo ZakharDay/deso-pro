@@ -258,7 +258,12 @@ function updateWalletMyTokenRowPnl(tokenData, total) {
   const tokenRow = document.querySelector(`#myTokenRow_${tokenData.publicKey}`)
   const totalValueInUsdCell = tokenRow.querySelector('#totalValueInUsdCell')
   const totalValueInUsd = tokenRow.querySelector('#totalValueInUsd')
-  const totalInUsdFormated = CalcsAndFormatters.formatPrice(total.totalInUsd, 2)
+
+  const totalInUsdFormated = CalcsAndFormatters.formatPrice(
+    total.totalInUsdInQuote,
+    2
+  )
+
   totalValueInUsd.innerText = `${totalValueInUsd.innerText} (${totalInUsdFormated})`
 
   if (total.totalInUsd < 0) {

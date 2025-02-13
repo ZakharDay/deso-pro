@@ -5,11 +5,28 @@ import { DataModifiers } from './data_modifiers'
 
 import { OpenfundApiRequests } from './openfund_api_requests'
 import { OpenfundWalletHtml } from './openfund_wallet_html'
-import { FocusAllPagesHtml } from './focus_all_pages_html'
 
 function getHolderKeyAndSetToStore() {
   const holderKey = OpenfundWalletHtml.getHolderPublicKey()
   Store.setHolderKey(holderKey)
+}
+
+function getExchangeRateAndSetToStore() {
+  return new Promise((resolve) => {
+    OpenfundApiRequests.getExchangeRate().then((data) => {
+      Store.setExchangeRate(data)
+      resolve()
+    })
+  })
+}
+
+function getFocusExchangeRateAndSetToStore() {
+  return new Promise((resolve) => {
+    OpenfundApiRequests.getFocusPriceInUsd().then((focusPriceInUsd) => {
+      Store.setFocusPrice(focusPriceInUsd)
+      resolve()
+    })
+  })
 }
 
 function getFocusInvestedAndShowOnPage() {
@@ -186,6 +203,8 @@ function getMyTokenPnlAndUpdateTokenRow(holderKey, holdingKey, tokenData) {
 
 const OpenfundWalletController = {
   getHolderKeyAndSetToStore,
+  getExchangeRateAndSetToStore,
+  getFocusExchangeRateAndSetToStore,
   getFocusInvestedAndShowOnPage,
   prepareMyTokensTable,
   getMyTokensDataAndUpdateTable,

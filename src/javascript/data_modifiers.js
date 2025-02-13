@@ -1,5 +1,5 @@
-import { Constants } from './constants'
 import { Store } from './store'
+import { Constants } from './constants'
 import { CalcsAndFormatters } from './calcs_and_formatters'
 
 function processDaoCoinTranferTransactions(transactions) {
@@ -128,7 +128,11 @@ function processTradeTransactions(transactions) {
 }
 
 function processTokenRecentTrades(trades, quote) {
+  const exchangeRate = Store.getExchangeRate()
+  const focusPrice = Store.getFocusPrice()
+
   let totalInUsd = 0
+  let totalInUsdInQuote = 0
   let totalInFocus = 0
   let totalInDeso = 0
 
@@ -163,9 +167,29 @@ function processTokenRecentTrades(trades, quote) {
         totalInFocus += tradeBuyQuantity
       }
     }
+
+    // console.log(trade)
   })
 
-  return { totalInUsd, totalInFocus, totalInDeso }
+  if (quote == 'DESO') {
+    totalInUsdInQuote =
+      totalInDeso * (exchangeRate['USDCentsPerDeSoExchangeRate'] / 100)
+  } else if (quote == 'FOCUS') {
+    totalInUsdInQuote = totalInFocus * focusPrice['MidPrice']
+  } else {
+    totalInUsdInQuote = totalInUsd
+  }
+
+  if (
+    (trades.data.tradingRecentTrades.nodes[0] &&
+      trades.data.tradingRecentTrades.nodes[0].tokenUsername == 'focus') ||
+    (trades.data.tradingRecentTrades.nodes[0] &&
+      trades.data.tradingRecentTrades.nodes[0].tokenUsername == 'openfund')
+  ) {
+    totalInUsdInQuote = totalInUsd
+  }
+
+  return { totalInUsd, totalInUsdInQuote, totalInFocus, totalInDeso }
 }
 
 const DataModifiers = {
