@@ -96,13 +96,23 @@ function getMyTokensDataAndUpdateTable() {
 
         OpenfundWalletHtml.addUserProfileContextMenu(tokenRow, tokenData)
 
-        OpenfundWalletController.getMyTokenDataAndUpdateTokenRow(
-          holderKey,
-          publicKey,
-          tokenData
-        ).then(() => {
-          getMyTokenPnlAndUpdateTokenRow(holderKey, publicKey, tokenData)
-        })
+        OpenfundWalletController.getCoinPropertiesAndSetToStore(tokenData).then(
+          () => {
+            OpenfundWalletHtml.updateWalletTokenRowFee(tokenData)
+
+            OpenfundWalletController.getMyTokenDataAndUpdateTokenRow(
+              holderKey,
+              publicKey,
+              tokenData
+            ).then(() => {
+              OpenfundWalletController.getMyTokenPnlAndUpdateTokenRow(
+                holderKey,
+                publicKey,
+                tokenData
+              )
+            })
+          }
+        )
       }
     )
   })
@@ -198,7 +208,23 @@ function getMyTokenPnlAndUpdateTokenRow(holderKey, holdingKey, tokenData) {
   ).then((trades) => {
     const quote = OpenfundWalletHtml.getCurrencyQuoteFromTokenRow(tokenData)
     const total = DataModifiers.processTokenRecentTrades(trades, quote)
-    OpenfundWalletHtml.updateWalletMyTokenRowPnl(tokenData, total)
+    OpenfundWalletHtml.updateWalletMyTokenRowPnl(tokenData, total, quote)
+  })
+}
+
+function getCoinPropertiesAndSetToStore(tokenData) {
+  return new Promise((resolve, reject) => {
+    const tokensStoredData = Store.getMyTokensData()
+
+    OpenfundApiRequests.getCoinProperties(tokenData.publicKey).then((data) => {
+      tokensStoredData.forEach((token) => {
+        if (token.username == data['Profile']['Username']) {
+          token.coinProperties = data
+        }
+      })
+
+      resolve()
+    })
   })
 }
 
@@ -209,7 +235,9 @@ const OpenfundWalletController = {
   getFocusInvestedAndShowOnPage,
   prepareMyTokensTable,
   getMyTokensDataAndUpdateTable,
-  getMyTokenDataAndUpdateTokenRow
+  getMyTokenDataAndUpdateTokenRow,
+  getMyTokenPnlAndUpdateTokenRow,
+  getCoinPropertiesAndSetToStore
 }
 
 export { OpenfundWalletController }

@@ -220,52 +220,74 @@ function updateWalletMyTokenRow(tokenData, quote, trade) {
   )
 
   if (newTokenPrice > tokenPrice || newTotalValue > totalValue) {
-    updateWalletTokenRowFee(tokenData, trade)
-
     tokenPriceInUsd.innerText = CalcsAndFormatters.formatPrice(newTokenPrice, 6)
     tokenPriceInQuoteCurrencyQuote.innerText = quote
     tokenPriceInQuoteCurrencyQuote.dataset.quote = quote
+
+    //
+    //
+    //
 
     tokenPriceInQuoteCurrencyAmount.innerText = CalcsAndFormatters.formatPrice(
       trade['ExecutionPriceInQuoteCurrency'],
       2
     )
 
+    //
+    //
+    //
+
     totalValueInUsd.innerText = CalcsAndFormatters.formatPrice(newTotalValue, 2)
     totalValueInQuoteCurrecyQuote.innerText = quote
+
+    //
+    //
+    //
 
     totalValueInQuoteCurrecyAmount.innerText = CalcsAndFormatters.formatPrice(
       trade['ExecutionReceiveAmount'],
       2
     )
+
+    //
+    //
+    //
   }
 }
 
-function updateWalletTokenRowFee(tokenData, trade) {
+function updateWalletTokenRowFee(tokenData) {
   const tokenRow = document.querySelector(`#myTokenRow_${tokenData.publicKey}`)
   const tokenFee = tokenRow.querySelector('#tokenFee')
+  const fee = tokenData.coinProperties['TotalTradingFeeBasisPoints'] / 100
 
-  const fee = trade['ExecutionFeeAmountInQuoteCurrency']
-  const received = trade['ExecutionReceiveAmount']
-  const percent = fee / (received / 100)
+  // const fee = trade['ExecutionFeeAmountInQuoteCurrency']
+  // const received = trade['ExecutionReceiveAmount']
+  // const percent = fee / (received / 100)
 
   const tokenFeeText =
-    percent == 0
-      ? 'no fee'
-      : `${CalcsAndFormatters.formatPrice(percent, 1)}% fee`
+    fee == 0.0 ? 'no fee' : `${CalcsAndFormatters.formatPrice(fee, 1)}% fee`
 
   tokenFee.innerText = tokenFeeText
 }
 
-function updateWalletMyTokenRowPnl(tokenData, total) {
+function updateWalletMyTokenRowPnl(tokenData, total, quote) {
   const tokenRow = document.querySelector(`#myTokenRow_${tokenData.publicKey}`)
   const totalValueInUsdCell = tokenRow.querySelector('#totalValueInUsdCell')
   const totalValueInUsd = tokenRow.querySelector('#totalValueInUsd')
+
+  const totalValueInQuoteCurrecyAmount = tokenRow.querySelector(
+    '#totalValueInQuoteCurrecyAmount'
+  )
 
   const totalInUsdFormated = CalcsAndFormatters.formatPrice(
     total.totalInUsdInQuote,
     2
   )
+
+  // const totalInUsdFormated = CalcsAndFormatters.formatQuantity(
+  //   total.totalInUsdInQuote,
+  //   2
+  // )
 
   totalValueInUsd.innerText = `${totalValueInUsd.innerText} (${totalInUsdFormated})`
 
@@ -274,7 +296,30 @@ function updateWalletMyTokenRowPnl(tokenData, total) {
     totalValueInUsdCell.classList.add('text-red-600')
   }
 
-  // console.log(total)
+  // let totalValueInQuoteCurrecyAmountFormatted = 0
+
+  // if (quote == 'FOCUS') {
+  //   totalValueInQuoteCurrecyAmountFormatted = CalcsAndFormatters.formatQuantity(
+  //     total.totalInFocus,
+  //     2
+  //   )
+  // }
+
+  // if (quote == 'DESO') {
+  //   totalValueInQuoteCurrecyAmountFormatted = CalcsAndFormatters.formatQuantity(
+  //     total.totalInDeso,
+  //     2
+  //   )
+  // }
+
+  // if (quote == 'DESO') {
+  //   totalValueInQuoteCurrecyAmountFormatted = CalcsAndFormatters.formatQuantity(
+  //     total.totalInDeso,
+  //     2
+  //   )
+  // }
+
+  // totalValueInQuoteCurrecyAmount.innerText = `${totalValueInQuoteCurrecyAmount.innerText} (${totalValueInQuoteCurrecyAmountFormatted})`
 }
 
 function getCurrencyQuoteFromTokenRow(tokenData) {
@@ -414,6 +459,7 @@ const OpenfundWalletHtml = {
   prepareMyTokenRowValueCell,
   addUserProfileContextMenu,
   getCurrencyQuoteFromTokenRow,
+  updateWalletTokenRowFee,
   //
   //
   updateWalletMyTokenRow,

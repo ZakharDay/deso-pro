@@ -67,6 +67,30 @@ function getFocusPriceInUsd() {
   })
 }
 
+function getCoinProperties(publicKey) {
+  return new Promise((resolve, reject) => {
+    fetch(OpenfundApiUrls.getCoinProperties, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        BaseCurrencyPublicKey: publicKey
+      })
+    })
+      .then((response) => {
+        response.json().then((data) => {
+          // console.log('Success:', data)
+          resolve(data)
+        })
+      })
+      .catch((error) => {
+        console.error('Error:', error)
+        reject()
+      })
+  })
+}
+
 function getMarketOrderData(
   quoteKey,
   baseKey,
@@ -299,6 +323,7 @@ const OpenfundApiRequests = {
   getIsHodlingPublicKey,
   getExchangeRate,
   getFocusPriceInUsd,
+  getCoinProperties,
   getMarketOrderData,
   getGqlTradingRecentTrades,
   getGqlTokenTradingRecentTrades,

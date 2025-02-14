@@ -65,10 +65,10 @@ function waitAsyncPageLoad() {
     currentPageDetector = document.querySelector(Constants.focusLogoSelector)
 
     if (document.head && document.body && currentPageDetector) {
-      console.log('DETECTOR LOADED')
+      // console.log('DETECTOR LOADED')
       initFocusAllPage(currentPageDetector)
     } else {
-      console.log('WILL REPEAT')
+      // console.log('WILL REPEAT')
       setTimeout(() => {
         waitAsyncPageLoad()
       }, 100)

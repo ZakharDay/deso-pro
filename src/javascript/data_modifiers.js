@@ -168,30 +168,70 @@ function processTokenRecentTrades(trades, quote) {
       }
     }
 
-    console.log(trade.tokenUsername)
+    //
+    //
+    //
+
+    if (trade.denominatedCoinPublicKey == Constants.focusKey) {
+      if (tradeType == 'BUY') {
+        totalInUsdInQuote -= tradeSellQuantity * focusPrice['MidPrice']
+      }
+
+      if (tradeType == 'SELL') {
+        totalInUsdInQuote += tradeBuyQuantity * focusPrice['MidPrice']
+      }
+    }
+
+    if (
+      trade.denominatedCoinPublicKey == Constants.desoProxyKey ||
+      trade.denominatedCoinPublicKey == Constants.desoKey
+    ) {
+      if (tradeType == 'SELL') {
+        totalInUsdInQuote +=
+          tradeBuyQuantity * (exchangeRate['USDCentsPerDeSoExchangeRate'] / 100)
+      }
+
+      if (tradeType == 'BUY') {
+        totalInUsdInQuote -=
+          tradeSellQuantity *
+          (exchangeRate['USDCentsPerDeSoExchangeRate'] / 100)
+      }
+    }
+
+    if (trade.denominatedCoinPublicKey == Constants.usdcKey) {
+      if (tradeType == 'BUY') {
+        totalInUsdInQuote -= tradeSellQuantity
+      }
+
+      if (tradeType == 'SELL') {
+        totalInUsdInQuote += tradeBuyQuantity
+      }
+    }
+
+    // console.log(trade)
   })
 
-  if (quote == 'DESO') {
-    console.log(totalInDeso, exchangeRate['USDCentsPerDeSoExchangeRate'] / 100)
+  // if (quote == 'DESO') {
+  //   console.log(totalInDeso, exchangeRate['USDCentsPerDeSoExchangeRate'] / 100)
 
-    totalInUsdInQuote =
-      totalInDeso * (exchangeRate['USDCentsPerDeSoExchangeRate'] / 100)
-  } else if (quote == 'FOCUS') {
-    totalInUsdInQuote = totalInFocus * focusPrice['MidPrice']
-    // } else if (quote == 'USDC') {
-    //   totalInUsdInQuote = totalInUsd
-  } else {
-    totalInUsdInQuote = totalInUsd
-  }
+  //   totalInUsdInQuote =
+  //     totalInDeso * (exchangeRate['USDCentsPerDeSoExchangeRate'] / 100)
+  // } else if (quote == 'FOCUS') {
+  //   totalInUsdInQuote = totalInFocus * focusPrice['MidPrice']
+  //   // } else if (quote == 'USDC') {
+  //   //   totalInUsdInQuote = totalInUsd
+  // } else {
+  //   totalInUsdInQuote = totalInUsd
+  // }
 
-  if (
-    (trades.data.tradingRecentTrades.nodes[0] &&
-      trades.data.tradingRecentTrades.nodes[0].tokenUsername == 'focus') ||
-    (trades.data.tradingRecentTrades.nodes[0] &&
-      trades.data.tradingRecentTrades.nodes[0].tokenUsername == 'openfund')
-  ) {
-    totalInUsdInQuote = totalInUsd
-  }
+  // if (
+  //   (trades.data.tradingRecentTrades.nodes[0] &&
+  //     trades.data.tradingRecentTrades.nodes[0].tokenUsername == 'focus') ||
+  //   (trades.data.tradingRecentTrades.nodes[0] &&
+  //     trades.data.tradingRecentTrades.nodes[0].tokenUsername == 'openfund')
+  // ) {
+  //   totalInUsdInQuote = totalInUsd
+  // }
 
   return { totalInUsd, totalInUsdInQuote, totalInFocus, totalInDeso }
 }
