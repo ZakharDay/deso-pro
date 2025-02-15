@@ -1,5 +1,3 @@
-import '../extension.scss'
-
 import { Store } from './store'
 import { Constants } from './constants'
 import { CalcsAndFormatters } from './calcs_and_formatters'
@@ -144,6 +142,15 @@ function prepareMyTokenRowValueCell(tokenRow) {
 
   totalValueInQuoteCurrecy.appendChild(totalValueInQuoteCurrecyAmount)
   totalValueInQuoteCurrecy.appendChild(totalValueInQuoteCurrecyQuote)
+}
+
+function prepareMyTokenActionBar(tokenRow) {
+  const actionBar = tokenRow.querySelector('td:last-child')
+  actionBar.id = 'actionBar'
+
+  const moveToHiddenButton = actionBar.querySelector('div > button:first-child')
+  moveToHiddenButton.id = 'moveToHiddenButton'
+  moveToHiddenButton.innerText = 'Hide'
 }
 
 function addUserProfileContextMenu(tokenRow, tokenData) {
@@ -457,6 +464,7 @@ const OpenfundWalletHtml = {
   prepareMyTokenRowTokenCell,
   prepareMyTokerRowPriceCell,
   prepareMyTokenRowValueCell,
+  prepareMyTokenActionBar,
   addUserProfileContextMenu,
   getCurrencyQuoteFromTokenRow,
   updateWalletTokenRowFee,

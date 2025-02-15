@@ -1,3 +1,5 @@
+import './extension.scss'
+
 import { Constants } from './javascript/constants'
 import { Store } from './javascript/store'
 import { CalcsAndFormatters } from './javascript/calcs_and_formatters'

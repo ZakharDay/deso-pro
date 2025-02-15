@@ -77,6 +77,7 @@ function prepareMyTokensTable(container) {
     OpenfundWalletHtml.prepareMyTokenRowTokenCell(tokenRow)
     OpenfundWalletHtml.prepareMyTokerRowPriceCell(tokenRow)
     OpenfundWalletHtml.prepareMyTokenRowValueCell(tokenRow)
+    OpenfundWalletHtml.prepareMyTokenActionBar(tokenRow)
   }
 
   Store.setMyTokensData(myTokens)
