@@ -153,6 +153,7 @@ function parseJsonAndSave(response, token) {
 
       data.forEach((element) => {
         element.symbol = token
+        element.timestamp = new Date(element.timestamp)
 
         // if (element.time > 1738270800000) {
         if (token == 'DESO') {
@@ -189,10 +190,10 @@ Promise.all([
   //   y: { grid: true }
   // })
 
-  const formatTime = d3.utcFormat('%B')
+  // const formatTime = d3.utcFormat('%B')
   // formatTime(new Date()) // "May 31, 2023"
 
-  const x0 = [desoData[0].timestamp, desoData[desoData.length - 1].timestamp]
+  // const x0 = [desoData[0].timestamp, desoData[desoData.length - 1].timestamp]
 
   // desoData.map((i, index) => {
   //   if (index == 0 || index == desoData.length - 1) {
@@ -202,16 +203,30 @@ Promise.all([
 
   // const x1 = d3.scaleUtc(x0, [0, 10])
 
-  const x1 = d3.scaleUtc().domain([new Date(x0[0]), new Date(x0[1])])
+  // const x1 = d3.scaleUtc().domain([new Date(x0[0]), new Date(x0[1])])
 
-  const x2 = desoData.map((i, index) => {
-    return i.timestamp
-  })
+  // const x2 = desoData.map((i, index) => {
+  //   return i.timestamp
+  // })
 
-  console.log(x0)
+  // console.log(x0)
 
-  console.log(x1.ticks(10))
-  console.log(x1.tickFormat('d'))
+  // console.log(x1.ticks(10))
+  // console.log(x1.tickFormat('d'))
+
+  // const timeScale = d3
+  //   .scaleUtc()
+  //   .domain([
+  //     new Date(desoData[0].timestamp),
+  //     new Date(desoData[desoData.length - 1].timestamp)
+  //   ])
+  const timeScale = d3
+    .scaleUtc()
+    .domain([desoData[0].timestamp, desoData[desoData.length - 1].timestamp])
+
+  console.log(timeScale.ticks(d3.utcDay))
+
+  console.log(timeScale.ticks(10).map(timeScale.tickFormat()))
 
   const v1 = (d) => d.close
   const v2 = (d) => d.close
@@ -247,13 +262,14 @@ Promise.all([
     // color: { type: 'ordinal', scheme: 'set2', legend: true },
     marks: [
       // Plot.axisX(x1.ticks(d3.utcMonth, 1), {
-      Plot.axisX(x1.ticks(d3.utcMonth, 1), {
-        color: 'white',
-        anchor: 'bottom',
-        label: 'Months',
-        x: x1,
-        tickFormat: x1.tickFormat(formatTime)
-      }),
+      // Plot.axisX(timeScale.ticks(d3.utcDay), {
+      // Plot.axisX(timeScale.ticks(), {
+      //   color: 'white',
+      //   anchor: 'bottom',
+      //   label: 'Months',
+      //   x: timeScale,
+      //   tickFormat: timeScale.tickFormat()
+      // }),
       Plot.axisY(y2.ticks(), {
         color: 'orange',
         anchor: 'right',
@@ -270,11 +286,12 @@ Promise.all([
       }),
       // Plot.ruleX([0]),
       Plot.ruleY([0]),
-      Plot.lineY(desoData, { x: xx1, y: v1 }),
+      Plot.lineY(desoData, { x: 'timestamp', y: 'close' }),
+      // Plot.lineY(desoData, { x: 'timestamp', y: v1 })
       Plot.lineY(
         focusData,
         Plot.mapY((D) => D.map(y2), {
-          x: xx1,
+          x: 'timestamp',
           y: v2,
           stroke: 'orange'
         })
@@ -282,7 +299,7 @@ Promise.all([
       Plot.lineY(
         openfundData,
         Plot.mapY((D) => D.map(y3), {
-          x: xx1,
+          x: 'timestamp',
           y: v3,
           stroke: 'steelblue'
         })
