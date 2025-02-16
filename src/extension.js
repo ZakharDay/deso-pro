@@ -155,19 +155,19 @@ function parseJsonAndSave(response, token) {
         element.symbol = token
         element.timestamp = new Date(element.timestamp)
 
-        // if (element.time > 1738270800000) {
-        if (token == 'DESO') {
-          desoData.push(element)
-        }
+        if (element.time > 1738270800000) {
+          if (token == 'DESO') {
+            desoData.push(element)
+          }
 
-        if (token == 'FOCUS') {
-          focusData.push(element)
-        }
+          if (token == 'FOCUS') {
+            focusData.push(element)
+          }
 
-        if (token == 'OPENFUND') {
-          openfundData.push(element)
+          if (token == 'OPENFUND') {
+            openfundData.push(element)
+          }
         }
-        // }
       })
 
       resolve()
@@ -251,14 +251,14 @@ Promise.all([
   // console.log(focusData)
 
   const plot = Plot.plot({
-    // width,
-    // height: 600,
+    width: 1200,
+    height: 500,
     // y: { grid: true },
     // x: {
     //   tickFormat: d3.timeFormat('%b')
     //   // ticks: x1.ticks(10, '%B')
     // },
-    y: { axis: 'left', label: 'DESO Price' },
+    y: { axis: 'left', label: 'DESO Price', grid: true },
     // color: { type: 'ordinal', scheme: 'set2', legend: true },
     marks: [
       // Plot.axisX(x1.ticks(d3.utcMonth, 1), {
@@ -270,30 +270,41 @@ Promise.all([
       //   x: timeScale,
       //   tickFormat: timeScale.tickFormat()
       // }),
-      Plot.axisY(y2.ticks(), {
-        color: 'orange',
+      Plot.axisY(y2.ticks(8), {
+        color: '#F19170',
         anchor: 'right',
         label: 'FOCUS Price',
+        labelAnchor: 'top',
+        labelOffset: '-100',
+        // tickPadding: -30,
+        // labelAnchor: { top: 20, right: 20, bottom: 50, left: 70 },
+        // labelOffset: `${(637, 20)}`,
+        // labelOffset: { top: 20, right: 20, bottom: 50, left: 70 },
+        // marginTop: -100,
         y: y2,
-        tickFormat: y2.tickFormat()
+        tickFormat: y2.tickFormat(),
+        fontSize: 6,
+        fontWeight: 'bold'
       }),
-      Plot.axisY(y3.ticks(), {
-        color: 'steelblue',
+      Plot.axisY(y3.ticks(8), {
+        color: '#51A5FF',
         anchor: 'right',
         label: 'OPENFUND Price',
         y: y3,
-        tickFormat: y3.tickFormat()
+        tickFormat: y3.tickFormat(),
+        fontSize: 8,
+        fontWeight: 'bold'
       }),
       // Plot.ruleX([0]),
       Plot.ruleY([0]),
-      Plot.lineY(desoData, { x: 'timestamp', y: 'close' }),
+      Plot.lineY(desoData, { x: 'timestamp', y: 'close', stroke: '#C6C6C6' }),
       // Plot.lineY(desoData, { x: 'timestamp', y: v1 })
       Plot.lineY(
         focusData,
         Plot.mapY((D) => D.map(y2), {
           x: 'timestamp',
           y: v2,
-          stroke: 'orange'
+          stroke: '#F19170'
         })
       ),
       Plot.lineY(
@@ -301,7 +312,7 @@ Promise.all([
         Plot.mapY((D) => D.map(y3), {
           x: 'timestamp',
           y: v3,
-          stroke: 'steelblue'
+          stroke: '#51A5FF'
         })
       )
       // Plot.axisY({ anchor: 'left', label: 'left-top', labelAnchor: 'top' }),
@@ -373,7 +384,12 @@ Promise.all([
   })
 
   const div = document.createElement('div')
+  div.style.width = '1200px'
   document.body.prepend(div)
+  // plot.width = '1200px'
+  // plot.height = '500px'
+  plot.style.width = '1200px'
+  plot.style.height = '500px'
   div.append(plot)
 
   //
