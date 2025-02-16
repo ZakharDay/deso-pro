@@ -1,4 +1,5 @@
 let holderKey = ''
+let priceHistory = {}
 let exchangeRate = {}
 let focusPrice = {}
 let myTokens = []
@@ -13,6 +14,13 @@ let userCounter = 0
 
 function resetStore() {
   holderKey = ''
+
+  priceHistory = {
+    deso: [],
+    focus: [],
+    openfund: []
+  }
+
   exchangeRate = {}
   focusPrice = {}
   myTokens = []
@@ -32,6 +40,14 @@ function getHolderKey() {
 
 function setHolderKey(key) {
   holderKey = key
+}
+
+function getPriceHistory() {
+  return priceHistory
+}
+
+function setPriceHistory(data, token) {
+  priceHistory[token] = data
 }
 
 function getExchangeRate() {
@@ -124,6 +140,8 @@ function setUserCounter(counter) {
 
 const Store = {
   resetStore,
+  getPriceHistory,
+  setPriceHistory,
   getHolderKey,
   setHolderKey,
   getExchangeRate,

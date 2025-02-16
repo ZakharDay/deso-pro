@@ -39,6 +39,73 @@ function getCurrentMyTokenRow(tokenData) {
   return document.getElementById(`myTokenRow_${tokenData.publicKey}`)
 }
 
+function prepareMainWalletPanel() {
+  const mainWalletPanel = document.querySelector(Constants.mainWalletPanel)
+  const priceChart = document.createElement('div')
+  const coinButtons = document.createElement('div')
+  const desoButton = document.createElement('div')
+  const focusButton = document.createElement('div')
+  const openfundButton = document.createElement('div')
+  const userHeader = mainWalletPanel.firstChild
+  const userWallet = mainWalletPanel.lastChild
+
+  desoButton.innerText = 'DESO'
+  focusButton.innerText = 'FOCUS'
+  openfundButton.innerText = 'OPENFUND'
+
+  mainWalletPanel.id = 'mainWalletPanel'
+  coinButtons.id = 'coinButtons'
+  desoButton.id = 'desoButton'
+  focusButton.id = 'focusButton'
+  openfundButton.id = 'openfundButton'
+  userHeader.id = 'userHeader'
+  userWallet.id = 'userWallet'
+  priceChart.id = 'priceChart'
+
+  coinButtons.appendChild(desoButton)
+  coinButtons.appendChild(focusButton)
+  coinButtons.appendChild(openfundButton)
+
+  mainWalletPanel.appendChild(coinButtons)
+  mainWalletPanel.appendChild(priceChart)
+
+  desoButton.addEventListener('mouseover', (e) => {
+    const svg = priceChart.querySelector('svg')
+    const line = document.getElementById('desoLine')
+    line.setAttribute('stroke', '#b1b1b1')
+    svg.appendChild(line)
+  })
+
+  desoButton.addEventListener('mouseleave', (e) => {
+    const line = document.getElementById('desoLine')
+    line.setAttribute('stroke', '#424242')
+  })
+
+  focusButton.addEventListener('mouseover', (e) => {
+    const svg = priceChart.querySelector('svg')
+    const line = document.getElementById('focusLine')
+    line.setAttribute('stroke', '#d25c33')
+    svg.appendChild(line)
+  })
+
+  focusButton.addEventListener('mouseleave', (e) => {
+    const line = document.getElementById('focusLine')
+    line.setAttribute('stroke', '#663e30')
+  })
+
+  openfundButton.addEventListener('mouseover', (e) => {
+    const svg = priceChart.querySelector('svg')
+    const line = document.getElementById('openfundLine')
+    line.setAttribute('stroke', '#1969c0')
+    svg.appendChild(line)
+  })
+
+  openfundButton.addEventListener('mouseleave', (e) => {
+    const line = document.getElementById('openfundLine')
+    line.setAttribute('stroke', '#204166')
+  })
+}
+
 function prepareMyTokenRow(tokenRow, tokenData) {
   tokenRow.id = `myTokenRow_${tokenData.publicKey}`
 }
@@ -460,6 +527,7 @@ const OpenfundWalletHtml = {
   getHolderPublicKey,
   getTokenRowData,
   getCurrentMyTokenRow,
+  prepareMainWalletPanel,
   prepareMyTokenRow,
   prepareMyTokenRowTokenCell,
   prepareMyTokerRowPriceCell,

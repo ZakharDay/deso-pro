@@ -2,6 +2,29 @@ import { Store } from './store'
 import { Constants } from './constants'
 import { CalcsAndFormatters } from './calcs_and_formatters'
 
+function processJsonAndSave(response, token) {
+  return new Promise((resolve, reject) => {
+    response.json().then((data) => {
+      // console.log('Success:', data)
+
+      const priceHistory = []
+
+      data.forEach((element) => {
+        element.symbol = token
+        element.timestamp = new Date(element.timestamp)
+
+        if (element.time > 1738270800000) {
+          priceHistory.push(element)
+        }
+      })
+
+      Store.setPriceHistory(priceHistory, token)
+
+      resolve()
+    })
+  })
+}
+
 function processDaoCoinTranferTransactions(transactions) {
   return new Promise((resolve, reject) => {
     transactions.forEach((node) => {
@@ -237,6 +260,7 @@ function processTokenRecentTrades(trades, quote) {
 }
 
 const DataModifiers = {
+  processJsonAndSave,
   processDaoCoinTranferTransactions,
   processTokenRecentTrades,
   processTradeTransactions

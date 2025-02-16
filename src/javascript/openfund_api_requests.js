@@ -1,6 +1,7 @@
 import { Store } from './store'
 import { Constants } from './constants'
 import { OpenfundApiUrls } from './openfund_api_urls'
+import { DataModifiers } from './data_modifiers'
 
 function getIsHodlingPublicKey(holderKey, holdingKey) {
   return new Promise((resolve, reject) => {
@@ -18,6 +19,23 @@ function getIsHodlingPublicKey(holderKey, holdingKey) {
       .then((response) => {
         response.json().then((data) => {
           resolve(data)
+        })
+      })
+      .catch((error) => {
+        console.error('Error:', error)
+        reject()
+      })
+  })
+}
+
+function getHistoryData(url, token) {
+  return new Promise((resolve, reject) => {
+    fetch(url)
+      .then((response) => {
+        // console.log('RESPONSE', response)
+
+        DataModifiers.processJsonAndSave(response, token).then(() => {
+          resolve()
         })
       })
       .catch((error) => {
@@ -321,6 +339,7 @@ function getGqlFocusUsersCount() {
 
 const OpenfundApiRequests = {
   getIsHodlingPublicKey,
+  getHistoryData,
   getExchangeRate,
   getFocusPriceInUsd,
   getCoinProperties,

@@ -5,6 +5,9 @@ const desoKey = 'BC1YLgk64us61PUyJ7iTEkV4y2GqpHSi8ejWJRnZwsX6XRTZSfUKsop'
 
 const holdingsPanelId = 'headlessui-tabs-panel-:rp:'
 
+const mainWalletPanel =
+  '#app-root > div > div:nth-child(2) > div > div:nth-child(2)'
+
 const myTokensPanelSelector =
   '#app-root > div > div:last-child > div > div:last-child > div:last-child > div > div:last-child > div > div > div > table'
 
@@ -47,6 +50,7 @@ const Constants = {
   desoProxyKey,
   usdcKey,
   desoKey,
+  mainWalletPanel,
   holdingsPanelId,
   myTokensPanelSelector,
   focusLogoSelector,

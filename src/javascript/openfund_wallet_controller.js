@@ -1,8 +1,12 @@
+import * as d3 from 'd3'
+import * as Plot from '@observablehq/plot'
+
 import { Constants } from './constants'
 import { Store } from './store'
 import { CalcsAndFormatters } from './calcs_and_formatters'
 import { DataModifiers } from './data_modifiers'
 
+import { OpenfundApiUrls } from './openfund_api_urls'
 import { OpenfundApiRequests } from './openfund_api_requests'
 import { OpenfundWalletHtml } from './openfund_wallet_html'
 
@@ -81,6 +85,94 @@ function prepareMyTokensTable(container) {
   }
 
   Store.setMyTokensData(myTokens)
+}
+
+function getPriceChartDataAndUpdateUi() {
+  Promise.all([
+    OpenfundApiRequests.getHistoryData(OpenfundApiUrls.desoHistoryUrl, 'deso'),
+    OpenfundApiRequests.getHistoryData(
+      OpenfundApiUrls.focusHistoryUrl,
+      'focus'
+    ),
+    OpenfundApiRequests.getHistoryData(
+      OpenfundApiUrls.openfundHistoryUrl,
+      'openfund'
+    )
+  ]).then(() => {
+    const priceHistory = Store.getPriceHistory()
+
+    const v1 = (d) => d.close
+
+    const y2 = d3.scaleLinear(d3.extent(priceHistory.focus, v1), [
+      0,
+      d3.max(priceHistory.deso, v1)
+    ])
+
+    const y3 = d3.scaleLinear(d3.extent(priceHistory.openfund, v1), [
+      0,
+      d3.max(priceHistory.deso, v1)
+    ])
+
+    const plot = Plot.plot({
+      width: 1630 + 80,
+      height: 400,
+      y: { axis: 'left', label: null },
+      marks: [
+        Plot.axisY(y2.ticks(8), {
+          color: '#F19170',
+          anchor: 'right',
+          label: null,
+          y: y2,
+          tickFormat: y2.tickFormat()
+        }),
+        Plot.axisY(y3.ticks(8), {
+          color: '#51A5FF',
+          anchor: 'right',
+          label: null,
+          y: y3,
+          tickFormat: y3.tickFormat()
+        }),
+        Plot.ruleY([0]),
+        Plot.lineY(priceHistory.deso, {
+          x: 'timestamp',
+          y: 'close',
+          stroke: '#424242',
+          strokeWidth: 4,
+          dx: -40
+        }),
+        Plot.lineY(
+          priceHistory.focus,
+          Plot.mapY((D) => D.map(y2), {
+            x: 'timestamp',
+            y: v1,
+            stroke: '#663E30',
+            strokeWidth: 4,
+            dx: -40
+          })
+        ),
+        Plot.lineY(
+          priceHistory.openfund,
+          Plot.mapY((D) => D.map(y3), {
+            x: 'timestamp',
+            y: v1,
+            stroke: '#204166',
+            strokeWidth: 4,
+            dx: -40
+          })
+        )
+      ]
+    })
+
+    const priceChart = document.getElementById('priceChart')
+    priceChart.append(plot)
+
+    const desoLine = priceChart.querySelectorAll("g[aria-label='line']")[0]
+    const focusLine = priceChart.querySelectorAll("g[aria-label='line']")[1]
+    const openfundLine = priceChart.querySelectorAll("g[aria-label='line']")[2]
+    desoLine.id = 'desoLine'
+    focusLine.id = 'focusLine'
+    openfundLine.id = 'openfundLine'
+  })
 }
 
 function getMyTokensDataAndUpdateTable() {
@@ -235,6 +327,7 @@ const OpenfundWalletController = {
   getFocusExchangeRateAndSetToStore,
   getFocusInvestedAndShowOnPage,
   prepareMyTokensTable,
+  getPriceChartDataAndUpdateUi,
   getMyTokensDataAndUpdateTable,
   getMyTokenDataAndUpdateTokenRow,
   getMyTokenPnlAndUpdateTokenRow,
