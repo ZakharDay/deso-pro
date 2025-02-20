@@ -30,7 +30,9 @@ function getIsHodlingPublicKey(holderKey, holdingKey) {
 
 function getHistoryData(url, token) {
   return new Promise((resolve, reject) => {
-    fetch(url)
+    const timestamp = Date.now()
+
+    fetch(`${url}&to=${timestamp}`)
       .then((response) => {
         // console.log('RESPONSE', response)
 

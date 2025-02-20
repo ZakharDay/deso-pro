@@ -1,3 +1,70 @@
+body.lightTheme {
+  #userHeader,
+  #userWallet,
+  #coinButtons {
+    background-color: rgba(255, 255, 255, 0.8);
+  }
+
+  #desoButton {
+    color: #424242;
+
+    &:hover {
+      color: #424242;
+    }
+  }
+
+  #focusButton {
+    color: #d25c33;
+
+    &:hover {
+      color: #d25c33;
+    }
+  }
+
+  #openfundButton {
+    color: #1969c0;
+
+    &:hover {
+      color: #1969c0;
+    }
+  }
+}
+
+body.darkTheme {
+  #userHeader,
+  #userWallet,
+  #coinButtons {
+    background-color: rgba(0, 0, 0, 0.6);
+  }
+
+  #desoButton {
+    // color: #424242;
+    color: #b1b1b1;
+
+    &:hover {
+      color: #b1b1b1;
+    }
+  }
+
+  #focusButton {
+    // color: #663e30;
+    color: #d25c33;
+
+    &:hover {
+      color: #d25c33;
+    }
+  }
+
+  #openfundButton {
+    // color: #204166;
+    color: #1969c0;
+
+    &:hover {
+      color: #1969c0;
+    }
+  }
+}
+
 #mainWalletPanel {
   position: relative;
   overflow: hidden;
@@ -18,14 +85,14 @@
   z-index: 2;
   padding: 10px;
   border-radius: 1rem;
-  background-color: rgba(0, 0, 0, 0.6);
+  // background-color: rgba(0, 0, 0, 0.6);
 }
 
 #userWallet {
   position: relative;
   width: 45%;
   z-index: 2;
-  background-color: rgba(0, 0, 0, 0.6);
+  // background-color: rgba(0, 0, 0, 0.6);
 }
 
 #coinButtons {
@@ -37,41 +104,51 @@
   gap: 20px;
   padding: 10px;
   border-radius: 1rem;
-  background-color: rgba(0, 0, 0, 0.6);
+  // background-color: rgba(0, 0, 0, 0.6);
 }
 
 #desoButton,
 #focusButton,
 #openfundButton {
+  cursor: pointer;
   transition: all 0.3s ease;
-}
 
-#desoButton {
-  color: #424242;
-  cursor: pointer;
+  div:not(.currency) {
+    font-size: 14px;
+    color: rgba(140, 159, 183, 0.627);
+    transition: all 0.3s ease;
+  }
 
   &:hover {
-    color: #b1b1b1;
+    div:not(.currency) {
+      color: rgba(140, 159, 183, 0.9);
+    }
   }
 }
 
-#focusButton {
-  color: #663e30;
-  cursor: pointer;
+// #desoButton {
+//   color: #424242;
 
-  &:hover {
-    color: #d25c33;
-  }
-}
+//   &:hover {
+//     color: #b1b1b1;
+//   }
+// }
 
-#openfundButton {
-  color: #204166;
-  cursor: pointer;
+// #focusButton {
+//   color: #663e30;
 
-  &:hover {
-    color: #1969c0;
-  }
-}
+//   &:hover {
+//     color: #d25c33;
+//   }
+// }
+
+// #openfundButton {
+//   color: #204166;
+
+//   &:hover {
+//     color: #1969c0;
+//   }
+// }
 
 @media (max-width: 1600px) {
   #userHeader {

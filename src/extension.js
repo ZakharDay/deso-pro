@@ -16,10 +16,14 @@ import { FocusAllPagesHtml } from './javascript/focus_all_pages_html'
 
 let pageObserver
 
+// function observeThemeChange() {
+//   // data - radix - popper - content - wrapper
+// }
+
 function observeUrlChange() {
   let lastUrl = location.href
 
-  new MutationObserver(() => {
+  pageObserver = new MutationObserver(() => {
     const url = location.href
 
     if (url !== lastUrl) {
@@ -84,6 +88,8 @@ function waitAsyncPageLoad() {
 
 function initOpenfundWalletPage(container) {
   Store.resetStore()
+
+  OpenfundWalletController.getThemeAndUpdateHtml()
 
   OpenfundWalletHtml.injectCss()
   OpenfundWalletHtml.prepareMainWalletPanel()

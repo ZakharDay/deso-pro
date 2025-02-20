@@ -1,3 +1,6 @@
+import * as d3 from 'd3'
+import * as Plot from '@observablehq/plot'
+
 import { Store } from './store'
 import { Constants } from './constants'
 import { CalcsAndFormatters } from './calcs_and_formatters'
@@ -49,10 +52,6 @@ function prepareMainWalletPanel() {
   const userHeader = mainWalletPanel.firstChild
   const userWallet = mainWalletPanel.lastChild
 
-  desoButton.innerText = 'DESO'
-  focusButton.innerText = 'FOCUS'
-  openfundButton.innerText = 'OPENFUND'
-
   mainWalletPanel.id = 'mainWalletPanel'
   coinButtons.id = 'coinButtons'
   desoButton.id = 'desoButton'
@@ -61,6 +60,10 @@ function prepareMainWalletPanel() {
   userHeader.id = 'userHeader'
   userWallet.id = 'userWallet'
   priceChart.id = 'priceChart'
+
+  desoButton.innerText = 'DESO'
+  focusButton.innerText = 'FOCUS'
+  openfundButton.innerText = 'OPENFUND'
 
   coinButtons.appendChild(desoButton)
   coinButtons.appendChild(focusButton)
@@ -72,37 +75,37 @@ function prepareMainWalletPanel() {
   desoButton.addEventListener('mouseover', (e) => {
     const svg = priceChart.querySelector('svg')
     const line = document.getElementById('desoLine')
-    line.setAttribute('stroke', '#b1b1b1')
+    // line.setAttribute('stroke', '#b1b1b1')
     svg.appendChild(line)
   })
 
   desoButton.addEventListener('mouseleave', (e) => {
     const line = document.getElementById('desoLine')
-    line.setAttribute('stroke', '#424242')
+    // line.setAttribute('stroke', '#424242')
   })
 
   focusButton.addEventListener('mouseover', (e) => {
     const svg = priceChart.querySelector('svg')
     const line = document.getElementById('focusLine')
-    line.setAttribute('stroke', '#d25c33')
+    // line.setAttribute('stroke', '#d25c33')
     svg.appendChild(line)
   })
 
   focusButton.addEventListener('mouseleave', (e) => {
     const line = document.getElementById('focusLine')
-    line.setAttribute('stroke', '#663e30')
+    // line.setAttribute('stroke', '#663e30')
   })
 
   openfundButton.addEventListener('mouseover', (e) => {
     const svg = priceChart.querySelector('svg')
     const line = document.getElementById('openfundLine')
-    line.setAttribute('stroke', '#1969c0')
+    // line.setAttribute('stroke', '#1969c0')
     svg.appendChild(line)
   })
 
   openfundButton.addEventListener('mouseleave', (e) => {
     const line = document.getElementById('openfundLine')
-    line.setAttribute('stroke', '#204166')
+    // line.setAttribute('stroke', '#204166')
   })
 }
 
@@ -220,6 +223,85 @@ function prepareMyTokenActionBar(tokenRow) {
   moveToHiddenButton.innerText = 'Hide'
 }
 
+function addPriceChart() {
+  const priceHistory = Store.getPriceHistory()
+
+  const v1 = (d) => d.close
+
+  const y2 = d3.scaleLinear(d3.extent(priceHistory.focus, v1), [
+    0,
+    d3.max(priceHistory.deso, v1)
+  ])
+
+  const y3 = d3.scaleLinear(d3.extent(priceHistory.openfund, v1), [
+    0,
+    d3.max(priceHistory.deso, v1)
+  ])
+
+  const plot = Plot.plot({
+    width: 1630 + 80,
+    height: 400,
+    y: { axis: 'left', label: null },
+    marks: [
+      Plot.axisY(y2.ticks(8), {
+        color: '#F19170',
+        anchor: 'right',
+        label: null,
+        y: y2,
+        tickFormat: y2.tickFormat()
+      }),
+      Plot.axisY(y3.ticks(8), {
+        color: '#51A5FF',
+        anchor: 'right',
+        label: null,
+        y: y3,
+        tickFormat: y3.tickFormat()
+      }),
+      Plot.ruleY([0]),
+      Plot.lineY(priceHistory.deso, {
+        x: 'timestamp',
+        y: 'close',
+        // stroke: '#424242',
+        stroke: '#b1b1b1',
+        strokeWidth: 4,
+        dx: -40
+      }),
+      Plot.lineY(
+        priceHistory.focus,
+        Plot.mapY((D) => D.map(y2), {
+          x: 'timestamp',
+          y: v1,
+          // stroke: '#663E30',
+          stroke: '#d25c33',
+          strokeWidth: 4,
+          dx: -40
+        })
+      ),
+      Plot.lineY(
+        priceHistory.openfund,
+        Plot.mapY((D) => D.map(y3), {
+          x: 'timestamp',
+          y: v1,
+          // stroke: '#204166',
+          stroke: '#1969c0',
+          strokeWidth: 4,
+          dx: -40
+        })
+      )
+    ]
+  })
+
+  const priceChart = document.getElementById('priceChart')
+  priceChart.append(plot)
+
+  const desoLine = priceChart.querySelectorAll("g[aria-label='line']")[0]
+  const focusLine = priceChart.querySelectorAll("g[aria-label='line']")[1]
+  const openfundLine = priceChart.querySelectorAll("g[aria-label='line']")[2]
+  desoLine.id = 'desoLine'
+  focusLine.id = 'focusLine'
+  openfundLine.id = 'openfundLine'
+}
+
 function addUserProfileContextMenu(tokenRow, tokenData) {
   const networks = [
     'focus',
@@ -258,6 +340,42 @@ function addUserProfileContextMenuItem(tokenData, network, contextMenu) {
   profileLink.classList.add('linkItem')
 
   contextMenu.appendChild(profileLink)
+}
+
+function updatePriceChartButton() {
+  const priceHistory = Store.getPriceHistory()
+
+  const desoLastPriceData = priceHistory.deso[priceHistory.deso.length - 1]
+  const desoPriceInUsd = desoLastPriceData.close
+  const desoPriceInUsdFormatted = CalcsAndFormatters.formatPrice(
+    desoPriceInUsd,
+    4
+  )
+
+  const focusLastPriceData = priceHistory.focus[priceHistory.focus.length - 1]
+  const focusPriceInDeso = focusLastPriceData.close
+  const focusPriceInUsd = focusPriceInDeso * desoPriceInUsd
+  // prettier-ignore
+  const focusPriceInDesoFormatted = CalcsAndFormatters.formatPrice(focusPriceInDeso, 6)
+  // prettier-ignore
+  const focusPriceInUsdFormatted = CalcsAndFormatters.formatPrice(focusPriceInUsd, 4)
+
+  // prettier-ignore
+  const openfundLastPriceData = priceHistory.openfund[priceHistory.openfund.length - 1]
+  const openfundPriceInDeso = openfundLastPriceData.close
+  const openfundPriceInUsd = openfundPriceInDeso * desoPriceInUsd
+  // prettier-ignore
+  const openfundPriceInDesoFormatted = CalcsAndFormatters.formatPrice(openfundPriceInDeso, 4)
+  // prettier-ignore
+  const openfundPriceInUsdFormatted = CalcsAndFormatters.formatPrice(openfundPriceInUsd, 4)
+
+  const desoButton = document.getElementById('desoButton')
+  const focusButton = document.getElementById('focusButton')
+  const openfundButton = document.getElementById('openfundButton')
+
+  desoButton.innerHTML = `<div class="currency">DESO</div><div>${desoPriceInUsdFormatted} USD</div>`
+  focusButton.innerHTML = `<div class="currency">FOCUS</div><div>${focusPriceInDesoFormatted} DESO</div><div>${focusPriceInUsdFormatted} USD</div>`
+  openfundButton.innerHTML = `<div class="currency">OPENFUND</div><div>${openfundPriceInDesoFormatted} DESO</div><div>${openfundPriceInUsdFormatted} USD</div>`
 }
 
 //
@@ -330,6 +448,8 @@ function updateWalletMyTokenRow(tokenData, quote, trade) {
 }
 
 function updateWalletTokenRowFee(tokenData) {
+  // console.log(tokenData)
+
   const tokenRow = document.querySelector(`#myTokenRow_${tokenData.publicKey}`)
   const tokenFee = tokenRow.querySelector('#tokenFee')
   const fee = tokenData.coinProperties['TotalTradingFeeBasisPoints'] / 100
@@ -533,8 +653,10 @@ const OpenfundWalletHtml = {
   prepareMyTokerRowPriceCell,
   prepareMyTokenRowValueCell,
   prepareMyTokenActionBar,
+  addPriceChart,
   addUserProfileContextMenu,
   getCurrencyQuoteFromTokenRow,
+  updatePriceChartButton,
   updateWalletTokenRowFee,
   //
   //
